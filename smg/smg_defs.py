@@ -45,7 +45,7 @@ Controls = {
 
 def adjust_control(control_name, control_value):
     if control_name not in Controls.keys():
-        raise "Unknown Control", control_name
+        raise KeyError("Unknown Control " + control_name)
     Controls[control_name] = control_value;
     return Controls[control_name]
 
@@ -60,29 +60,137 @@ def check_control(control_name):
 
 # {{{ Exceptions
 
-Parse_Error             ="Error in State Machine input"
-Incomplete_SM_Statement ="Incomplete State Machine statement"
-No_State_For_Description="State Description does not follow State"
-No_Event_For_Description="Event Description does not follow Event"
-Unknown_SM_Statement    ="Invalid or Unknown State Machine directive"
-FileNotFound            ="File not found"
-FileNameNeeded          ="File name must be specified before"
-ReadSetSMBeforeWrite    ="State Machine must be read/defined before writing"
-OpenNeeded              ="Input must be opened before"
-OpenAndReadNeeded       ="Input must be opened and read before"
-ReadNeeded              ="Input must be read before"
-ConflictingTargetStates ="Multiple Target states for the Same Event"
-MultipleCodeSpecs       ="Multiple Code Segments specified for the Same Event"
-UnknownCodeTag          ="Code TAG is not defined for specified tag"
-DuplicateEvent          ="Event was declared multiple times"
-SM_Include_File         ="Need to read sub-SM file from include directive"
-UnopenedContextEnd      ="Unopened Context Ended"
-OpenContext             ="Unclosed contexts (no SM_END)"
-InitAlreadySpecified    ="Init state already specified"
-NotSupported            ="Unsupported directive/keyword combination"
-OrphanStates            ="Orphan states (no entry or exit)"
-UnreachableSourceStates ="Non-INIT_STATE source state (no entries, unreachable)"
+class Parse_Error(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return  "Error in State Machine input " + repr(self.value)
 
+class Incomplete_SM_Statement(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Incomplete State Machine statement " + repr(self.value)
+
+class No_State_For_Description(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "State Description does not follow State " + repr(self.value)
+
+class No_Event_For_Description(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Event Description does not follow Event " + repr(self.value)
+
+class Unknown_SM_Statement(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Invalid or Unknown State Machine directive " + repr(self.value)
+
+class FileNotFound(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "File not found " + repr(self.value)
+
+class FileNameNeeded(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "File name must be specified before " + repr(self.value)
+
+class ReadSetSMBeforeWrite(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "State Machine must be read/defined before writing " + repr(self.value)
+
+class OpenNeeded(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Input must be opened before " + repr(self.value)
+
+class OpenAndReadNeeded(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Input must be opened and read before " + repr(self.value)
+
+class ReadNeeded(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Input must be read before " + repr(self.value)
+
+class ConflictingTargetStates(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Multiple Target states for the Same Event " + repr(self.value)
+
+class MultipleCodeSpecs(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Multiple Code Segments specified for the Same Event " + repr(self.value)
+
+class UnknownCodeTag(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Code TAG is not defined for specified tag " + repr(self.value)
+
+class DuplicateEvent(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Event was declared multiple times " + repr(self.value)
+
+class SM_Include_File(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Need to read sub-SM file from include directive " + repr(self.value)
+
+class UnopenedContextEnd(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Unopened Context Ended " + repr(self.value)
+
+class OpenContext(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Unclosed contexts (no SM_END) " + repr(self.value)
+
+class InitAlreadySpecified(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Init state already specified " + repr(self.value)
+
+class NotSupported(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Unsupported directive/keyword combination " + repr(self.value)
+
+class OrphanStates(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Orphan states (no entry or exit) " + repr(self.value)
+
+class UnreachableSourceStates(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Non-INIT_STATE source state (no entries, unreachable) " + repr(self.value)
 
 # {{{ Global Constants
 

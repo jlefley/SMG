@@ -83,7 +83,7 @@ class smg_state:
            not self.events[event_name][5]:
             if (new_state and self.events[event_name][0] and
                 new_state != self.events[event_name][0]):
-                raise ConflictingTargetStates, 'State %s, Event %s\n' \
+                raise ConflictingTargetStates('State %s, Event %s\n' \
                       '\t\tExisting\tNew\n' \
                       'Tgt State\t%s\t%s\n' \
                       'Pre Grp Code\t%s\t%s\n' \
@@ -98,15 +98,15 @@ class smg_state:
                     self.events[event_name][3], post_group_code,
                     self.events[event_name][4], pre_solo_code,
                     self.events[event_name][5], Default_spec
-                    )
+                    ))
             if pre_solo_code and self.events[event_name][2]:
-                raise MultipleCodeSpecs, \
+                raise MultipleCodeSpecs(\
                       'State %s, Event %s, Pre-state code'%(
-                    self._name, event_name)
+                    self._name, event_name))
             if post_solo_code and self.events[event_name][4]:
-                raise MultipleCodeSpecs, \
+                raise MultipleCodeSpecs(\
                       'State %s, Event %s, Post-state code'%(
-                    self._name, event_name)
+                    self._name, event_name))
             if Default_spec:
                 discard4,\
                             discard1,\
@@ -596,7 +596,7 @@ class smg_code:
                                 'subhandling':subhandling
                                 })
                         else:
-                            raise NotSupported, '%(event)s cascaded sub-event for any state'
+                            raise NotSupported('%(event)s cascaded sub-event for any state')
                             rstr = string.replace(
                                 rstr, "%s%s"%(sid,event),
                                 #kwq: _/OBJ: sm_name instance!
@@ -653,7 +653,7 @@ class smg_transition:
                  pre_code_tag='', post_code_tag=''):
         self._trans_type = trans_type
         if event == '*':
-            raise NotSupported, "event wildcard for TRANS statement"
+            raise NotSupported("event wildcard for TRANS statement")
         self._trans = (from_state, event, to_state)
         self._pre_code_tag = pre_code_tag
         self._post_code_tag = post_code_tag
@@ -783,8 +783,8 @@ class smg_state_machine:
         words = string.split(addition.contents())
         filename = addition.filename()
         if len(words) < 2:
-            raise Incomplete_SM_Statement, "%s, line %d"%(filename,
-                                                          addition.line_num())
+            raise Incomplete_SM_Statement("%s, line %d"%(filename,
+                                                          addition.line_num()))
         if words[0] == 'SM_DESC':
             self._desc = "%s\n%s"%(self._desc, string.join(words[1:]))
         elif words[0] == 'SM_OBJ':
@@ -793,9 +793,9 @@ class smg_state_machine:
             self._evtt = string.join(words[1:])
         elif words[0] == 'SM_INCL':
             if len(words) > 2:
-                raise SM_Include_File, (words[1], words[2])
+                raise SM_Include_File((words[1], words[2]))
             else:
-                raise SM_Include_File, words[1]
+                raise SM_Include_File(words[1])
         elif words[0] == 'STATE':
             sdesc = ''
             if len(words) > 2: sdesc = string.join(words[2:])
@@ -806,7 +806,7 @@ class smg_state_machine:
             self._last_state = words[1]
         elif words[0] == 'INIT_STATE':
             if self.init_state and len(self.init_state):
-                raise InitAlreadySpecified, words[1]
+                raise InitAlreadySpecified(words[1])
             sdesc = ''
             if len(words) > 2: sdesc = string.join(words[2:])
             if words[1] not in self._states.keys():
@@ -826,27 +826,27 @@ class smg_state_machine:
                 self._events_names.append(words[1])
                 self._events.append(smg_event(words[1], entry, prep, edesc))
             else:
-                raise DuplicateEvent, \
+                raise DuplicateEvent(\
                       "%s, line %d, Event %s"%(filename,
                                                addition.line_num(),
-                                               words[1])
+                                               words[1]))
         elif words[0] == 'ST_DESC':
             if len(self._states):
                 self._states[
                     self._last_state].set_desc(string.join(words[1:]))
             else:
-                raise No_State_For_Description, \
-                      "%s, line %d"%(filename, addition.line_num())
+                raise No_State_For_Description(\
+                      "%s, line %d"%(filename, addition.line_num()))
         elif words[0] == 'EV_DESC':
             if len(self._events):
                 self._events[-1].set_desc(string.join(words[1:]))
             else:
-                raise No_Event_For_Description, \
-                      "%s, line %d"%(filename, addition.line_num())
+                raise No_Event_For_Description(\
+                      "%s, line %d"%(filename, addition.line_num()))
         elif words[0] in ('TRANS', 'TRANS+', 'TRANS='):
             if len(words) < 4:
-                raise Incomplete_SM_Statement, \
-                      "%s, line %d"%(filename, addition.line_num())
+                raise Incomplete_SM_Statement(\
+                      "%s, line %d"%(filename, addition.line_num()))
             pre_code = None
             post_code = None
             if len(words) == 5:
@@ -861,13 +861,13 @@ class smg_state_machine:
                                                   words[2],
                                                   pre_code, post_code))
             except NotSupported, why:
-                raise NotSupported, '%s, line %d -- %s'%(filename,
+                raise NotSupported('%s, line %d -- %s'%(filename,
                                                          addition.line_num(),
-                                                         why)
+                                                         why))
         elif words[0] == 'CODE':
             if len(words) < 3:
-                raise Incomplete_SM_Statement, \
-                      "%s, line %d"%(filename, addition.line_num())
+                raise Incomplete_SM_Statement(\
+                      "%s, line %d"%(filename, addition.line_num()))
             if words[1] in self._codes.keys():
                 self._codes[words[1]] = (self._codes[words[1]] +
                                          string.join(words[2:]))
@@ -878,8 +878,8 @@ class smg_state_machine:
         elif words[0] == SM_Code_Delimiters[0]:
             lines = string.split(addition.contents(), '\n')
             if len(lines) < 2:
-                raise Incomplete_SM_Statement, \
-                      "%s, line %d"%(filename, addition.line_num())
+                raise Incomplete_SM_Statement(\
+                      "%s, line %d"%(filename, addition.line_num()))
             lspacecnt = len(lines[1]) - len(string.lstrip(lines[1]))
             lspace = ' ' * lspacecnt
             if words[1] in self._codes.keys():
@@ -898,15 +898,15 @@ class smg_state_machine:
         elif words[0] == P_Code_Delimiters[0]:
             lines = string.split(addition.contents(), '\n')
             if len(lines) < 2:
-                raise Incomplete_SM_Statement, \
-                      "%s, line %d"%(filename, addition.line_num())
+                raise Incomplete_SM_Statement(\
+                      "%s, line %d"%(filename, addition.line_num()))
             self._pcodes[words[1]] = smg_code(words[1], filename,
                                               addition.line_num(),
                                               string.join(lines[1:], '\n'))
 
         else:
-            raise Unknown_SM_Statement, "%s, line %d"%(filename,
-                                                       addition.line_num())
+            raise Unknown_SM_Statement("%s, line %d"%(filename,
+                                                       addition.line_num()))
         return self
 
 
@@ -934,19 +934,19 @@ class smg_state_machine:
                 for ctag in (event.entry(), event.prep()):
                     if ctag and len(ctag) and ctag != '--':
                         if ctag not in self._codes.keys():
-                            raise UnknownCodeTag, \
+                            raise UnknownCodeTag(\
                                   'Entry "%s" for event %s'%(ctag,
-                                                             event.name())
+                                                             event.name()))
 
             for trans in self._trans:
                 for code in (trans.pre_code_tag(), trans.post_code_tag()):
                     if code and len(code) and code != '--':
                         if code not in self._codes.keys():
-                            raise UnknownCodeTag, \
+                            raise UnknownCodeTag(
                                   """Code tag %s for trans from state %s """\
                                   """to state %s via event %s"""%(
                                 code, trans.from_state(), trans.to_state(),
-                                trans.event())
+                                trans.event()))
 
             # Now, preload the UNDEFINED TRANSITION target state as the default
             for state in self._states.values():
@@ -983,7 +983,7 @@ class smg_state_machine:
                                      trans.post_code_tag()):
                             if not code: continue
                             if code not in self._codes.keys():
-                                raise UnknownCodeTag, code
+                                raise UnknownCodeTag(code)
                             c_tstates = self._codes[code].target_states(
                                 self._states.keys())
                             if len(c_tstates):
@@ -1026,15 +1026,15 @@ class smg_state_machine:
             orphans = filter(lambda st: st.role() == 'Orphan',
                              self._states.values())
             if len(orphans):
-                raise OrphanStates, map(lambda st: st.name(), orphans)
+                raise OrphanStates(map(lambda st: st.name(), orphans))
 
             if self.init_state:
                 sources = filter(lambda st,init_state = self.init_state:
                                  st.role()=='Source' and st.name()!=init_state,
                                  self._states.values())
                 if len(sources):
-                    raise UnreachableSourceStates, map(lambda st: st.name(),
-                                                       sources)
+                    raise UnreachableSourceStates(map(lambda st: st.name(),
+                                                       sources))
         
 
             # Assign values to the events and states
@@ -1102,7 +1102,7 @@ class smg_state_machine:
         except 'funky',bar:
             self.status(['Processing'], [ 'BAD!' ])
             print 'SMG Processing Exception (%s)'%(bar)
-            raise Parse_Error, bar
+            raise Parse_Error(bar)
         
         ### Handle Warnings
         except OrphanStates,bar:
@@ -1170,8 +1170,8 @@ class smg_state_machine:
                         "%s;\n"%self._codes[entry].tagged_C_code(self._name),
                         "", "        ", 77))
                 except KeyError:
-                    raise UnknownCodeTag, \
-                          'Entry "%s" for event %s'%(entry, event.name())
+                    raise UnknownCodeTag(\
+                          'Entry "%s" for event %s'%(entry, event.name()))
         cdef_str = string.replace(cdef_str, "<entry_defs>", ostring.getvalue())
         ostring.close()
 
@@ -1519,14 +1519,14 @@ class smg_compiler:
     
     def read(self):
         if not self._sm_file:
-            raise OpenNeeded, "reading"
+            raise OpenNeeded("reading")
         self._sm_file.read()
 
     def write_C_defs(self):
         if not self._def_filename:
-            raise OpenAndReadNeeded, "writing"
+            raise OpenAndReadNeeded("writing")
         if not self._sm_file:
-            raise ReadNeeded, "writing"
+            raise ReadNeeded("writing")
         outfile = open(self._def_filename, 'w')
         outfile.write(GenFileWarning)
         for sm in self._sm:
@@ -1536,9 +1536,9 @@ class smg_compiler:
 
     def write_C_code(self):
         if not self._out_filename:
-            raise OpenAndReadNeeded, "writing"
+            raise OpenAndReadNeeded("writing")
         if not self._sm_file:
-            raise ReadNeeded, "writing"
+            raise ReadNeeded("writing")
         outfile = open(self._out_filename, 'w')
         outfile.write(GenFileWarning)
 
@@ -1559,9 +1559,9 @@ class smg_compiler:
 
     def write_P_code(self):
         if not self._p_filename:
-            raise OpenAndReadNeeded, "writing"
+            raise OpenAndReadNeeded("writing")
         if not self._sm_file:
-            raise ReadNeeded, "writing"
+            raise ReadNeeded("writing")
         outfile = open(self._p_filename, 'w')
         outfile.write(GenFileWarning)
         map(lambda sm,o=outfile: sm.write_P_code(o), self._sm)
@@ -1579,7 +1579,7 @@ class smg_compiler:
     #
     def sm_extract(self):
         if not self._sm_file:
-            raise ReadNeeded, "extracting State Machines"
+            raise ReadNeeded("extracting State Machines")
         sm = None
 
         phrases = self._sm_file.phrases()
@@ -1592,8 +1592,8 @@ class smg_compiler:
             words = string.split(phrase.contents())
             if len(words) == 0: continue
             if len(words) < 2:
-                raise Incomplete_SM_Statement, "not enough words, %s, line %d"%(
-                    self._sm_filename, phrase.line_num())
+                raise Incomplete_SM_Statement("not enough words, %s, line %d"%(
+                    self._sm_filename, phrase.line_num()))
 
             if words[0] == SM_Commands[0]:
                 if sm: self._sm.append(sm)
@@ -1640,9 +1640,9 @@ class smg_compiler:
 
     def sm_evaluate(self):
         if not self._sm_file:
-            raise ReadNeeded, "extracting State Machines"
+            raise ReadNeeded("extracting State Machines")
         if len(self._sm) == 0:
-            raise ReadNeeded, "evaluating State Machines (missing extract?)"
+            raise ReadNeeded("evaluating State Machines (missing extract?)")
         map(lambda foo: foo.evaluate(), self._sm)
         
 

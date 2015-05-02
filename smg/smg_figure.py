@@ -95,7 +95,7 @@ class event_dict:
             if event not in self.good_ev_dict.values():
                 num_evs = len(self.good_ev_dict)
                 if num_evs > (len(string.uppercase) * len(string.uppercase)-1):
-                    raise 'Too Many Events!!!', num_evs
+                    raise RuntimeError('Too Many Events!!! ' + num_evs)
                 elif num_evs > len(string.uppercase) - 1:
                     key = '%c%c'%(
                         string.uppercase[num_evs / len(string.uppercase)],
@@ -141,7 +141,7 @@ class event_dict:
 # {{{ write_viz_file
 def write_viz_file(viz_filename, figure_type, sm_obj):
         if not viz_filename:
-            raise OpenAndReadNeeded, "writing"
+            raise OpenAndReadNeeded("writing")
         outfile = open(viz_filename, 'w')
         outfile.write(GenFileWarning)
 

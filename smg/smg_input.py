@@ -148,7 +148,7 @@ class smg_file:
         if os.path.exists(filename):
             self._filename = filename
         else:
-            raise FileNotFound, filename
+            raise FileNotFound(filename)
 
     #----------------------------------------------------------------
     # Read and process input .sm file to generate phrases
@@ -158,7 +158,7 @@ class smg_file:
         if filename:
             self._filename = filename
         if not self._filename:
-            raise FileNameNeeded, "read"
+            raise FileNameNeeded("read")
 
         f = open(self._filename)
         l = f.readlines()
@@ -205,22 +205,22 @@ class smg_file:
                 phrase_type = SM_stmt
                 if words[0] == 'SM_DEF':
                     if len(words) != 2:
-                        raise Incomplete_SM_Statement, "%s, line %d"%(
-                            self._filename, line_num)
+                        raise Incomplete_SM_Statement("%s, line %d"%(
+                            self._filename, line_num))
                     if words[1] not in self.Contexts:
                         self.Contexts.append(words[1])
                     continue
                 elif words[0] == 'SM_IF':
                     if len(words) != 2:
-                        raise Incomplete_SM_Statement, "%s, line %d"%(
-                            self._filename, line_num)
+                        raise Incomplete_SM_Statement("%s, line %d"%(
+                            self._filename, line_num))
                     if words[1] not in self.Contexts:
                         out_context.append(words[1])
                     continue
                 elif words[0] == 'SM_ELSE':
                     if len(words) != 2:
-                        raise Incomplete_SM_Statement, "%s, line %d"%(
-                            self._filename, line_num)
+                        raise Incomplete_SM_Statement("%s, line %d"%(
+                            self._filename, line_num))
                     if len(out_context) == 0:
                         out_context.append(words[1])
                     elif words[1] != out_context[-1]:
@@ -230,13 +230,13 @@ class smg_file:
                     continue
                 elif words[0] == 'SM_END':
                     if len(words) != 2:
-                        raise Incomplete_SM_Statement, "%s, line %d"%(
-                            self._filename, line_num)
+                        raise Incomplete_SM_Statement("%s, line %d"%(
+                            self._filename, line_num))
                     if len(out_context) > 0:
                         if words[1] != out_context[-1]:
-                            raise UnopenedContextEnd, "%s @ %s:%d %s"%(
+                            raise UnopenedContextEnd("%s @ %s:%d %s"%(
                                 words[1], self._filename, line_num,
-                                out_context)
+                                out_context))
                         out_context = out_context[:-1]
                     continue
                 #KWQ: verify len(out_context)==0 at very end
@@ -313,7 +313,7 @@ class smg_file:
             if c_phrase: self._phrases.append(c_phrase)
 
         if len(out_context):
-            raise OpenContext, 'Contexts open (outer-to-inner): %s'%out_context
+            raise OpenContext('Contexts open (outer-to-inner): %s'%out_context)
             
         return self._phrases
 
