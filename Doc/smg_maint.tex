@@ -1,0 +1,202 @@
+\section{SMG Maintenance}
+
+
+\subsection{Dependencies}
+\subsubsection{Python}
+
+SMG itself is written in Python code and therefore the system must
+have Python available.  The initial version of Python used for SMG
+development was 1.5.2.  Subsequent versions were maintained using
+Python 2.2; SMG should still run under Python 1.5.2 although this has
+not been specifically verified.
+
+Python is available from:
+\href{http://www.python.org/}{http://www.python.org/}.
+
+
+
+\hypertarget{GraphViz}{\subsubsection{GraphViz}}
+
+The GraphViz utility has been developed by AT\&T Research and converts
+a text description of a graph into a representational Postscript
+figure.  It can alternatively produce GIF, MIF or Web imap figures as
+well.  The graphical output is very helpful in analyzing the resulting state
+machine.
+
+SMG outputs a description of the state machine itself to a \file{.dot}
+file, which is then passed to GraphViz to generate the desired
+graphical output. The \file{.dot} file itself is not intended for
+analysis.
+
+The GraphViz distribution version used for SMG development was 1.5.
+The GraphViz package is available at:
+\href{http://www.research.att.com/sw/tools/graphviz}{http://www.research.att.com/sw/tools/graphviz}
+
+
+\hypertarget{Spin}{\subsubsection{Spin}}
+
+Promela and the Spin utility are independently developed by AT\&T and
+are not related to the SMG preprocessor.  Spin is available at:
+\href{http://netlib.bell-labs.com/netlib/spin/whatispin.html}{http://netlib.bell-labs.com/netlib/spin/whatispin.html}
+
+
+\subsubsection{Interactions}
+
+The SMG preprocessor is an independently developed utility and is not
+related to the GraphViz program developed by AT\&T nor the Python
+language and interpreter developed by Guido van Rossum.  Python is
+available from the above Web site.  The GraphViz program is available
+independently from AT\&T under their license.
+
+
+\subsection{SMG License}
+
+Copyright (c) 2000-2003, Kevin Quick
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the conditions are met:
+
+\begin{itemize}
+
+\item Redistributions of source code must retain the above copyright
+  notice, this list of conditions, and the following disclaimer.
+
+\item Redistributions in binary form must reproduce the above copyright
+  notice, this list of conditions and the following disclaimers in the
+  documentation and/or other materials provided with the distribution.
+
+\item Neither the name of Kevin Quick nor the names of other contributors may
+  be used to endorse or promote products derived from this software
+  without specific prior written permission.
+
+\end{itemize}
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS," AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT
+HOLDERS OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+
+\subsection{SMG Change Log}
+
+\begin{description}
+
+\item[v1.7.2]
+  \begin{itemize}
+    \item Added the \code{-E} flag for generating embeddable code.
+    \item Added Examples: \code{button}, \code{button2},
+      \code{buttonlib} (thanks to Bob Paddock,
+      \code{<bpaddock@csonline.net>})
+  \end{itemize}
+\item[v1.7.1]
+  \begin{itemize}
+  \item {\it [Internal]} Created graphviz module and modified
+    \file{smg_figure} to use it.
+  \end{itemize}
+\item[v1.7]
+  \begin{itemize}
+    \item Added documentation for \SMELSE (not new to SMG, just not doc'd).
+    \item Added path search for \SMINCL
+    \item Added optional version parameter for \SMINCL
+    \item $[$Documentation:$]$
+      \begin{itemize}
+      \item Document updates: clarification on \smg{<xxx>} keyword validity.
+      \item Cleanup of existing examples
+      \end{itemize}
+    \item $[$Documentation:$]$
+      \begin{itemize}
+      \item Documented SMG Libraries
+      \item Documented Support and Tracing Functions
+      \item Documentation rearranged somewhat
+      \end{itemize}
+  \end{itemize}
+
+\item[v1.6]
+  \begin{itemize}
+  \item Minor updates.  Preparation for SF file release.
+  \item Addition of \smg{SMG_SYNTAX_A} syntax version context definition.
+  \end{itemize}
+  
+\item[v1.5]
+  \begin{itemize}
+  \item Added \file{sm-mode.el} for Emacs syntax highlighting and
+    indenting controls.
+  \item Added handling for cascaded sub-events.
+  \item Added validation to detect terminal states, source states, and
+    erroneous combinations: non-\INITSTATE source states, and
+    orphan states (no entries or exits)
+  \item Added \code{-b} flag for bounds checking incoming events.
+    This also changed the values (and ordering) for states and events
+    in the \file{smdefs.h} file.
+  \end{itemize}
+  
+\item[v1.4]
+  \begin{itemize}
+  \item Added the \INITSTATE for instantiation-initialized state
+    machines.
+  \item Modified state machine diagrams for visual identification of
+    key states (initial states, final states, and the undefined
+    transition error state).
+  \item Expanded examples to: \file{file_ex1}, \file{file_ex2},
+    \file{file_ex3}, and \file{file_ex4}.
+  \end{itemize}
+  
+\item[v1.3]
+  \begin{itemize}
+  \item Added \PROMELAbegin and \PROMELAend and output of Promela code
+    for spin verification.
+  \item Updated \code{xx_State_Machine_Error} function to include the
+    \code{err_id} for identifying and processing specific error
+    numbers.
+  \end{itemize}
+  
+\item[v1.2]
+  \begin{itemize}
+  \item Added clustering of nodes in figures
+  \end{itemize}
+  
+\item[v1.1]
+  \begin{itemize}
+  \item Added \SMDEF, \SMIF, and \SMEND statements for conditional
+    inclusion.
+  \item Internal code cleanup primarily focused on:
+  \item Significant Postscript output cleanup and labelling.
+  \end{itemize}
+  
+\item[v1.0.2]
+  \begin{itemize}
+  \item Better tracking of source \file{.sm} file, especially for
+    \SM{INCL} directives
+  \item Switch to ``\code{_/}'' instead of ``\incode{_#}'' as the SMG
+    identification prefix.  Still recognize the old, but the new one
+    prevents macro argument replacement errors.
+  \item Updated \SMTRACE for explicit macros for each type of trace
+  \end{itemize}
+  
+\item[v1.0.1]
+  \begin{itemize}
+  \item Added \SMTRACE and ``\code{-T}'' command line option
+    (tracing)
+  \item Added ``\code{-l}'' command line option (\#line output
+    suppression)
+  \item Added version number and output version on help line
+  \item Added \incode{_#SM_NAME} code keyword
+  \item Added internal event generation deferral for
+    \incode{_#<EVENT>}
+  \end{itemize}
+  
+\end{description}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "smg_guide"
+%%% End: 

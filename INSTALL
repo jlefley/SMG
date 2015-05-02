@@ -1,0 +1,81 @@
+SMG Installation instructions
+
+[These instructions are heavily oriented towards Unix environments, but
+ the installation and use of SMG should be supported in Windows as
+ well; let your conscience be your guide as to how to modify the
+ instructions for your Windows environment.]
+
+1) SMG is packaged with the distutils package of python.  Installation
+   is easy, but there are a few extra considerations.
+
+   a) SMG is based on Python, so it assumes you have python installed.
+      If you don't you should: python is a multi-platform scripting
+      language that is very nice to use.  See http://www.python.org
+      for more information.
+
+   b) Python release 1.6 and subsequent releases already contain the
+      distutils.  The distutils may be used under 1.5.2 but you will
+      need to specifically install them.  See
+      http://www.python.org/sigs/distutils-sig
+
+   c) Your installation may need some extra tweaking to use distutils,
+      especially if you are running Linux RedHat 6.1 with Python 1.5.2
+      pre-installed.  Specifically, you will probably need to issue
+      the following as root:
+
+		# mkdir /usr/lib/python1.5/config
+		# touch /usr/lib/python1.5/config/Makefile
+
+      Obviously, this is the minimum required.  Actual contents for
+      the above may be adviseable, but apparently not necessary for
+      distutils or smg installation.
+
+2) Untar or unzip the package in a place you would like to store the
+   SMG distribution (at least temporarily).  You probably already did
+   this if you're reading these instructions, but it never hurts to check.
+
+3) As root, issue the following commands:
+
+	# cd SMG-<version>
+	# python setup.py install
+
+4) SMG is now installed for python, but you need to create a command
+   to invoke SMG easily.  The best way is to create a link to the
+   smg.py file that was installed, although you may use a shell script
+   under Unix or a .bat file or shortcut under Windows as well.
+
+KWQ: Note 23 Mar 2002 ---------------------------------------------------
+Rather than creating the link below, we should auto-install an
+invocation script using best practices:
+
+smg.sh:
+#!/usr/bin/env python /usr/local/lib/python2.2/site-packages/smg/smg/py
+
+Just that one line should do it, although we have to figure out what the
+path is, but the setup.py could auto-build that one-line file as needed.
+Then, specify that file (without .sh... rename needed?) in setup.py's
+setup as "scripts=['smg'].  Make sure script name and package name being
+the same doesn't mess anything up... actually it will since smg python
+sources are in the "smg" directory, so we can't also have an smg script.
+See if scripts will rename the script as it's installed.  Anyhow, something
+along these lines should be done to avoid having to have the user do the
+following.
+KWQ: End Note 23 Mar 2002 ----------------------------------------------
+   Here's the Unix method for creating the link:
+
+	# python
+	>>> import smg
+	>>> smg.__path__
+	['<smg-path>']
+	>>> <Ctrl-D>
+	# ln -s <smg-path>/smg.py /usr/local/bin/smg
+	# chmod +x /usr/local/bin/smg
+
+   And here's the Unix method for creating the shell script.  Note
+   that this method is deprecated in favor of the link above because
+   of argument interpretation issues within the shell script.
+
+	# cat > /usr/local/bin/smg
+	python smg.py $*
+	<Ctrl-D>
+	# chmod +x /usr/local/bin/smg

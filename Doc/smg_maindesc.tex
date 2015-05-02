@@ -1,0 +1,430 @@
+\hyperbaseurl{http://smg.sf.net/}
+
+%\newcommand{\newfile}[1]{\texttt{#1}}
+\newcommand{\file}[1]{\lstinline[basicstyle=\ttfamily]!#1!\xspace}
+\newcommand{\code}[1]{\lstinline[basicstyle=\ttfamily]!#1!\xspace}
+\newcommand{\listcode}[1]{\lstinline[basicstyle=\ttfamily\footnotesize,indent=35pt]!#1!\xspace}
+%language=Pascal prevents funny typesetting when # characters are used.
+\newcommand{\incode}[1]{\lstinline[basicstyle=\ttfamily,language=Pascal]!#1!\xspace}
+\newcommand{\smg}[1]{\lstinline[basicstyle=\ttfamily,language=Pascal]!#1!\xspace}
+\newcommand{\SMG}[1]{\smg{SMG_#1}}
+\newcommand{\SM}[1]{\smg{SM_#1}}
+
+\newcommand{\INITSTATE}{\hyperlink{INITSTATE}{\smg{INIT_STATE}}\xspace}
+\newcommand{\SMOBJ}{\hyperlink{SMOBJ}{\SM{OBJ}}\xspace}
+\newcommand{\SMEVT}{\hyperlink{SMEVT}{\SM{EVT}}\xspace}
+\newcommand{\SMNAME}{\hyperlink{SMNAME}{\SM{NAME}}\xspace}
+\newcommand{\STATE}{\hyperlink{STATE}{\smg{STATE}}\xspace}
+\newcommand{\EVENT}{\hyperlink{EVENT}{\smg{EVENT}}\xspace}
+\newcommand{\TRANS}{\hyperlink{TRANS}{\smg{TRANS}}\xspace}
+\newcommand{\TRANSeq}{\hyperlink{TRANSeq}{\smg{TRANS=}}\xspace}
+\newcommand{\TRANSplus}{\hyperlink{TRANSplus}{\smg{TRANS+}}\xspace}
+\newcommand{\CODE}{\hyperlink{CODE}{\smg{CODE}}\xspace}
+\newcommand{\CODEbegin}{\hyperlink{CODEbegin}{\smg{CODE_\{}}\xspace}
+\newcommand{\CODEend}{\hyperlink{CODEend}{\smg{CODE_\}}\xspace}}
+\newcommand{\PROMELAbegin}{\hyperlink{PROMELAbegin}{\smg{PROMELA_\{}}\xspace}
+\newcommand{\PROMELAend}{\hyperlink{PROMELAend}{\smg{PROMELA_\}}\xspace}}
+\newcommand{\SMDEF}{\hyperlink{SMDEF}{\SM{DEF}}\xspace}
+\newcommand{\SMIF}{\hyperlink{SMIF}{\SM{IF}}\xspace}
+\newcommand{\SMELSE}{\hyperlink{SMELSE}{\SM{ELSE}}\xspace}
+\newcommand{\SMEND}{\hyperlink{SMEND}{\SM{END}}\xspace}
+\newcommand{\SMTRACE}{\hyperlink{SMTRACE}{\SM{TRACE}}\xspace}
+\newcommand{\SMINCL}{\hyperlink{SMINCL}{\SM{INCL}}\xspace}
+\newcommand{\SMDESC}{\hyperlink{SMDESC}{\SM{DESC}}\xspace}
+
+\begin{center}
+{\itshape Copyright \copyright 2001-2003}
+\end{center}
+
+\begin{abstract}
+  The SMG utility can be used to scan an input file for specific
+  directives that describe a State Machine (States, Events,
+  Transitions, and associated Code segments) and generate several
+  different outputs: C code to implement that State Machine, Promela
+  code to implement a formal verification of the State Machine using
+  \hyperlink{Spin}{Spin}, and a graphical representation of that State
+  Machine for analytical purposes.  In mechanical terms, the SMG may
+  be thought of as a specific-purpose C preprocessor.
+
+  The SMG utility may be obtained from: \code{http://smg.sf.net/}
+
+\end{abstract}
+
+\tableofcontents
+
+%\part{?}
+
+\section{Background}
+
+\subsection{Tunnel Vision}
+
+Modern programming techniques are often oriented around a procedural
+language such as C or a similarly structured object-oriented
+implementation.  When developing software using these languages, the
+prevalent coding methodology is to design a set of instructions and
+functions that will perform the intended sequence of tasks, using a
+top-down approach.  This sequence of tasks is identified as the
+primary objective of the program being developed.  This programming
+methodology is referred to as {\bf task-oriented} programming.
+
+Frequently, however, the attention to developing support for portions
+of the code not related to the primary objective is diminished or in
+some cases non-existent.  This results in unhandled or badly handled
+error paths and an inflexibility of the code regarding changes or
+deviations in input or operating environment.  The top-down approach
+can exacerbate this issue as the focus narrows as details are
+introduced, thereby causing those details to be developed with
+primarily local concerns.
+
+Additionally complicating this programming methodology is the attempt
+to introduce multi-threaded scheduling to improve the overall
+responsiveness of the program to multiple simultaneous inputs.  When
+introducing threading significant attention must be provided to
+properly protecting common data structures and maintaining each thread
+relative to all other threads and the overall program state.
+
+Finally, validation of the resulting code is left to a rote process of
+verifying functionality and output of the code when presented with
+sample sets of input; coverage tools attempt to verify that most of
+the written code has been executed, but this does not necessarily mean
+that the full range of input or sequencing has been tested in the
+process.  A technique known as modelling and formal verification can
+be used to abstract the functionality of the code, but this is usually
+only used in the architectural and early design phases; the
+resemblance of the final code to the formal verification model is
+tenuous at best and often minimal.  Developers tend to handle
+unexpected input or events as ``bugs'' by providing local fixes to
+ensure that their code does not fail when these occur, but without
+consideration of how the system as a whole should properly handle
+those situations and rarely by returning to and updating the formal
+verification model.
+
+\subsection{Asynchronous Event Handling}
+
+Another one of the frequent challenges in developing computer software
+is implementing and maintaining code that can fully manage an
+operation that is subject to asynchronous events.  Asynchronous events
+can take many forms, including: user-input, operation completion
+notifications, interrupts, and operation requests.  In general, an
+asynchronous event can occur at any time and the software must be
+capable of determining what the appropriate response to that event is
+at that point in time.
+
+These event-oriented environments are found in most non-computation
+oriented code and are especially prevalent in: Internet Servers,
+Device Drivers, and GUI implementations.
+
+The task-oriented coding style discussed previously makes it difficult
+to anticipate and handle exceptions to the sequence of tasks which are
+introduced by Asynchronous Events and also leads to assumptions
+regarding when events will occur and what types of events will occur
+at various delivery points.  Often ignored or lightly-addressed is the
+importance of determining the appropriate response to {\em all} types
+of events that may occur at {\em each} point where they may occur.
+
+One technique commonly used in applications written for an
+Asynchronous Event environment is to declare an event queue onto which
+all events are placed in order of occurrence.  The code then removes
+an event from the head of the queue, processes that event in a
+task-oriented manner until the event has been completely handled, and
+then returns to the queue to obtain the next event.  This algorithm
+may be useful in some circumstances but its appropriateness is often
+invalid when events cannot be queued, when events must be prioritized,
+and when some events may interrupt other events.
+
+\subsubsection{EDSM Methodology}
+
+An alternative coding style used in these situations is the {\bf
+  Event-Driven State Machine} or {\bf EDSM} methodology\footnote{The
+  State Machine described in the document is a Finite Deterministic
+  Mealy Machine, also referred to as a Deterministic Finite Automata
+  or DFA.}.  In this methodology, events are typically delivered to a
+common entry point and then a specific function or switch statement is
+invoked based on the current state or the event.  Once in that code
+has been invoked, the other parameter (entry or state) is examined to
+select the code to execute for that state/event combination.  While
+this style is more flexible in terms of handling unexpected events it
+is more arduous to develop code in this style due to the mechanics of
+reproducing state and event selection code throughout the code and the
+loss of the ``flow'' perspective for the primary sequence of tasks.
+
+Some software designs do implement an EDSM methodology, but
+unfortunately, most of the software in these implementations focuses
+on the expected sequence of operations only; it's frequently the case
+that not all events are handled at each event-delivery juncture in the
+code.
+
+Furthermore, in situations where state machines are implemented in the
+software, the completeness of the state machine tends to
+logarithmically increase the complexity and obscurity of that state
+machine, making them hard to understand and maintain.  Each possible
+state has to consider the potential occurrence of an ever-increasing
+number of events, and the addition of each state causes an
+event-number of new paths through the state machine.
+
+This type of code is difficult to maintain, especially for developers
+introduced to the code after it is written.  State machine code is
+often spread throughout the body of the main code, making it hard to
+understand the entirety of the state machine.  Furthermore, the state
+machine code has significant side effects; any change to a state
+machine's structure (i.e. adding a new state or changing the response
+to an event) will significantly impact code executing to handle future
+events.  Understanding, predicting, and assessing the validity of any
+changes to the state machine quickly becomes a monumental task as the
+size of the state machine grows.
+
+A formal verification model is a highly useful tool to properly
+evaluate and manage additions (states or events) to this type of code,
+but again, since the formal verification model is often retired or
+divergent at this point in development the opportunity is not often
+available.  Some institutions even separate the coding and formal
+verification modelling into separate groups, the former being handled
+by architects and the latter by developers.  Sometimes the developers
+are not even aware of the existence of formal verification models.
+
+\subsection{Non-blocking Operations}
+
+Another more recent advancement facing many implementations is the
+introduction of non-blocking function calls for performing various
+asynchronous tasks such as: I/O operations and remote procedure calls
+(RPC) found in distributed environments.  In these situations, the
+program's initial request is not completed when the request call
+completes; instead the request is processed in parallel or at some
+later point in time and when completed, the initial program is
+notified of that completion (usually by invocation of a callback
+function).
+
+This complicates the normally task-oriented methodology in the
+following ways:
+\begin{enumerate}
+\item The task-oriented flow is broken up into several different
+  ``chunks'' of code, split by the need to await a completion
+  indication after performing a non-blocking request.
+\item The potential for other events to occur while waiting for or
+  instead of the requested operation, with those events being
+  delivered before or instead of the primary operation's completion
+  indication.
+\item The potential for request re-entrancy, allowing the program to
+  handle a new request while waiting for an interim non-blocking
+  operation to complete for a previous request.  While this tends to
+  increase the overall efficiency of the program, it significantly
+  affects the management of common data and the management of this
+  now-pipelined implementation.
+\item The potential for the non-blocking request to signal completion
+  at any point after the request call is made, possibly even before
+  the request call returns to the calling process.
+\end{enumerate}
+These complications require significant additional care in properly
+and efficiently implementing applications for this type of environment.
+
+
+\section{The SMG Solution}
+
+The proposed approach to handling these issues is to attempt to
+reconcile the EDSM methodology with the more customary task-oriented
+programming styles.  In order to do this, we seek to automate the
+mechanics of EDSM and re-introduce the conceptual perspective of
+task-oriented coding styles.  This is done by beginning with the EDSM
+methodology and making the following set of observations and changes.
+
+To facilitate this approach, the SMG tool has been developed.  Using
+the SMG tool, the developer describes the state machine by a set of
+SMG directives interspersed with the program's normal C code.  
+
+The SMG directives are intended to be more succinct in describing the
+state machine than the corresponding C code, thereby allowing the
+state machine to be more easily recognized and understood even at the
+input specification level.  The SMG directives also allow default
+functionality to be specified and allows the state machine to be more
+``naturally'' described in parallel to the task-oriented code
+segments.
+
+Once the code (including SMG directives) has been developed, the code
+is passed through the State Machine Generator (SMG) as a preprocessing
+stage.  The SMG utility converts the SMG directives into C code which
+implements the described state machine, allowing the result to be
+passed to the C compiler as a combination of the state machine and the
+task-oriented code, providing a complete functional solution.
+
+\subsubsection{Visual Analysis}
+
+The SMG utility also produces a description of the state machine that
+may be passed to the \hyperlink{GraphViz}{GraphViz} utility to obtain a
+graphical representation of the state machine.  The graphical
+representation allows easy interpretation and maintenance of the state
+machine.
+
+The graphical representation shows the various states as nodes on the
+graphs and labels the arcs that connect those nodes with the names of
+the events that cause that transition.  The arc labels also indicate
+which code objects are executed before and after the event causes the
+actual state to change.
+
+Expected transitions are represented by thick arcs, making it easy to
+follow the normal code flow and differentiated from unusual or error
+handling transitions.
+
+SMG will also {\em automatically} generate an error state if there are
+any states wherein the result of an event is not defined explicitly by
+SMG directives.  The corresponding C code generated will cause a
+runtime error call to a programmer-supplied error routine if this
+undefined event transition occurs).  All transitions to this error
+state will be labelled as errors for easy analysis; final versions of
+the code should not contain any undefined transitions of this type.
+
+SMG will also group states in order to simplify the diagram.  For
+example, if a group of 5 states have normal transitions to other
+states, but they all transition to an error state when a particular
+event occurs, SMG will assign those 5 states to a group and separately
+indicate that the group transitions to the error state on that event.
+This grouping is performed automatically.
+
+\subsubsection{Functional Verification}
+
+The third SMG output is a \hyperlink{SPIN}{SPIN}/Promela model of the
+state machine.  This model is automatically extracted from the states,
+events, and transitions defined by the SMG directives.  It is
+therefore capable of describing the overall functionality of the
+system for SPIN functional verification without any additional input
+from the developer.
+
+To supplement and refine the functional verification process, standard
+Promela code can be identified in the input file by bracketing SMG
+directives.  The SMG utility will then direct this Promela code into
+the appropriate locations of the generated model as a parallel to the
+C code for the same transitions.  In this way, both the overall
+functionality and detailed modelling code can be maintained in the SMG
+input file along with the corresponding C code.  Thus, when additional
+states or events must be considered, or when one or more transitions
+must be redefined, the Promela model is correspondingly adjusted for
+continued formal verification.
+
+As with the graphical and C outputs, the emitted Promela code
+generates assertions for undefined transitions, causing them to be
+flagged during formal verification (or they can be disabled to
+validate the currently defined subset of the application).
+
+
+\subsection{SMG Development Cycle}
+
+SMG development is done by designing C code modules as in a normal
+development operation and implementing SMG directives in one or more
+of the modules.  Modules containing SMG directives typically have a
+``\file{.sm}'' suffix to distinguish them from normal ``\file{.c}''
+files (and so that SMG can generate a \file{.c} from the \file{.sm}).
+The SMG directives can appear exlusively in a file themselves or then
+can be intermixed throughout the C code to the degree desired by the
+coding style being used.
+
+The SMG directives also establish the {\bf States} and {\bf Events}
+that can occur, and optionally any {\bf entry points} into the code
+that represent Events.  The definitions of these States, Events, and
+entry points are output by SMG into a header include file
+(\file{xxx_smdefs.h}).  All modules needing to use a State or Event
+value or make other references to the state machine can include this
+file to obtain the appropriate external definitions.
+
+Once the C code and SMG directives have been written, the {\bf\tt smg}
+utility should be run on the \file{.sm} input files.  The graphical
+state machine output should be examined to visually verify the
+implementation, followed by formal verification using SPIN and the
+output Promela model.  Once the state machine has been formally
+verified, the output C code should be compiled by the C compiler and
+the linker for all C source files (some of which may have been output
+by the smg utility from \file{.sm} files).  All errors during the
+development cycle are resolved in the input \file{.sm} file rather
+than making modifications to interim files; the resulting SMG model is
+therefore fully complete and functional.
+
+\begin{figure*}
+\input{smg_fig1.tex}
+\end{figure*}
+%\input{old_smg_fig1.tex}
+
+\subsection{C Data Structures and Functions}
+
+In order to implement the EDSM methodology, SMG attempts to make
+minimal assumptions about the programming environment in which it will
+generate the state machine.
+
+SMG will automatically provide C definitions for the states and events
+described in its directives.  There are only two required C data types
+and based on the external interface for the program, and one required
+C function (the error handling function).  The programmer can
+optionally define the syntax of event delivery points within the code
+with additional directives and C declarations, but this is not
+required.  SMG does assume that if the event delivery points are not
+specified that the C program will provide the event-specific interface
+and invoke the state machine with an indication of the underlying
+event type.
+
+The first required C data type must be a structure and is the \SMOBJ
+structure.  This is assumed to be an instance of a structure that is
+global to the current task.  This structure may contain anything that
+the programmer desires to implement but it must also contain the
+following field: \code{<SM_NAME>_state_t sm_state;} where
+\code{<SM_NAME>} is the declared name of the state
+machine.\footnote{Multiple state machines may be defined in the same
+  \file{.sm} file, and they may even share a common \SMOBJ data
+  structure; the use of \code{<SM_NAME>} in all relavent state machine
+  interfaces keeps the state machines distinct and separate.}  It is
+recommended that the SMG-related code not refer to any global writable
+data outside of the \SMOBJ structure although it is possible to
+deviate from this under certain circumstances.
+
+The second required C data type is the \SMEVT type.  This data type is
+assumed to represent any and all information related to the current
+event-initiated task.  A common implementation is for the programmer
+to maintain a pool of \SMEVT structures which are used
+one-by-one as primary events arrive.  The \SMEVT type may be
+any valid C data type; it is used to maintain the task-oriented
+context for the series of secondary events that are initiated by the
+primary event.  The SMG code will not use the \SMEVT variable
+directly but will pass the value of this variable from the
+event-initiated state machine entry to the selected state/event
+handling code.\footnote{Because the \SMEVT variable is not actually
+  used by SMG-generated code, the associated variable may be unused
+  throughout but it still must be a valid data type.}
+
+%KWQ: this is really confusing.  Need a picture/example.
+
+%Rework/clarify this section and combine/subsection the development cycle
+
+%Re-org the following: SMG directive stuff, supporting code stuff
+
+
+\section{SMG Directives Overview}
+
+SMG directives are designed for simplicity in both parsing and
+specification.  Although the user can choose to design a preprocessing
+stage to preceed the SMG operation ({\it e.g.} m4), SMG directives are
+simply presented and designed to be unambiguously distinguishable from
+the C code into which they are placed.
+
+
+\subsection{Common SMG Directives}
+
+The list of directives allows for significant flexibility in how the
+state machine is described and where the various operations occur.
+Some of these capabilities are only needed for special situations, and
+some are dependent on the way in which the state machine is
+implemented.  Only the most basic directives are needed to identify a
+state machine and all other directives may be introduced only as
+needed when the basic directives are insufficient.  The basic
+directives are listed below:
+
+\begin{tabular}[h]{lll}
+\\
+\SMNAME & \TRANS \\
+\SMOBJ & \SMEVT \\
+\CODE & \CODEbegin & \CODEend \\
+\end{tabular}
+
+The reader is advised to attend to this subset of directives initially
+and to review the additional keywords presented in the SMG Guide once
+basic familiarity with SMG is attained.
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "smg_guide"
+%%% End: 

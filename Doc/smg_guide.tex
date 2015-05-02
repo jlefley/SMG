@@ -1,0 +1,39 @@
+\documentclass[10pt,twocolumn]{article}
+\usepackage{float}
+\usepackage{xspace}
+\usepackage[rdkeywords]{listings}
+\usepackage{longtable}
+\usepackage{hyperref}
+
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse    % we are not running PDFLaTeX
+\else
+\pdfoutput=1    % we are running PDFLaTeX
+\pdftrue
+\fi
+
+\ifpdf
+\usepackage[pdftex]{graphicx}
+\pdfcompresslevel=9
+\else
+\usepackage{graphicx}
+\fi
+
+\lstloadlanguages{C}
+\lstset{language=C,basicstyle=\small,commentstyle=\itshape\footnotesize,texcl=true}
+
+\title{SMG - State Machine Generator}
+\author{Kevin Quick \\ quick@null.net}
+\date{Version 1.7.2 \\ 30 Apr 2003}
+\begin{document}
+\maketitle
+\input{smg_maindesc}
+\input{smg_kw_full}
+\input{smg_lib}
+\input{smg_lib_impl}
+\input{smg_lib_example}
+\input{smg_examples}
+\input{smg_maint}
+\end{document}
+

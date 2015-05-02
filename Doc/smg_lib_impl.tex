@@ -1,0 +1,170 @@
+In the revised example, it is assumed
+that {\bf \code{myapp_global}} is a global structure whose type was
+reported to SMG by the \SMOBJ directive and that that structure
+contains the \code{sm_state} field, and it is also assumed that {\bf
+  \code{Iconicize_E}} is the name of an event declared with the \EVENT
+directive (or implicitly as part of a \TRANS directive).
+
+The only yet-to-be determined portion of the revised code is the
+\code{<event_obj>} specification.  This reference must be for a variable
+of a specific type that is useable to sufficiently represent the event
+in the state-machine-invoked code.  For the \code{myapp_iconicize}
+entry point, there are no parameters and therefore the event is fully
+represented just by its presence.  However, other events---such as the
+\code{myapp_mouse_b1}---have associated parameters that will need to be
+available to the event handling code.  Therefore, the following event
+representation structure is defined in \code{myapp} and declared with
+the \SMEVT directive:
+
+\begin{verbatim}
+typedef union {
+    struct {
+        int x;
+        int y;
+    } mouse_coords;
+    char keyval;
+} myapp_y_event_t;
+
+SM_EVT  myapp_y_event_t *
+\end{verbatim}
+
+Now all that's needed is to pass a structure of that type to the SMG
+State Machine Event handler routine.  There are a couple of choices as
+to where to obtain the structure:
+
+\begin{itemize}
+
+\item From the local stack.  This has the implicit requirement that the
+event handling code completely handles the event before returning since
+the stack copy will be gone when that return happens and the event entry
+point is exited.  This is not usually recommended, but it can be used
+in simple situations.
+
+\item From memory allocation.  This is probably the most convenient
+method, but it does mean that the event handling might be delayed by
+memory allocation time and it also means that the event handling code
+must deallocate the event structure when it has been fully handled.
+
+\item From an event object pool.  This uses a pre-allocated pool of
+structures which has the advantages (fast allocation) and disadvantages
+(resource limitations) of pool structures.  The event handling code
+should return the event structure to the pool when finished with it.
+
+\end{itemize}
+
+The example shown in Figure~\ref{figure:event-entry} will use the
+simple memory allocation method.  Also note that although {\em all}
+events must allocate the structure, different events must initialize
+the structure in a different manner and some events not at all,
+therefore a global macro can be used to perform the allocation.
+
+
+\begin{figure*}
+\begin{verbatim}
+#define INIT_EVT  myapp_y_event_t *evt = (void) malloc(sizeof(myapp_y_event_t)); \
+                                  if (!evt) return;
+
+void myapp_mouse_b1(int x, int y) {
+    INIT_EVT;
+    evt->mouse_coords.x = x;
+    evt->mouse_coords.y = y;
+    myapp_State_Machine_Event(&myapp_global, evt, Mouse_B1);
+}
+
+void myapp_iconicize(void) {
+    INIT_EVT;
+    myapp_State_Machine_Event(&myapp_global, evt, Iconicize_E);
+}
+\end{verbatim}
+\caption{Event Entry Actions}\label{figure:event-entry}
+\end{figure*}
+
+Now that the example is functionally correct again, all that
+remains is to recognize that the only variable part is the event
+encapsulation/initialization code; SMG can be tasked to create the
+invariant parts {\em independently} of the application.   Furthermore the
+event object can be defined entirely by the SMG Library since it only
+needs to contain the explicit arguments defined by the asynchronous API.
+The SMG Library can define \EVENT directives with \code{entry_code}
+portions that specify the correct functions and arguments for the event,
+and with \code{start_code} portions that perform the per-entry-point
+event structure initialization.
+
+The code in
+Figures~\ref{figure:y-w-lib-decls},~and~\ref{figure:y-w-lib-events}
+show how this is done by implementing the SMG Y-windows Library.
+
+\begin{figure*}
+\begin{verbatim}
+CODE_{  yw_mouse_b1_decl
+    void yw_mouse_b1_e ( int x, int y )
+CODE_}
+CODE_{  yw_mouse_b2_decl
+    void yw_mouse_bw_e ( int y, int x )
+CODE_}
+CODE    yw_key_entered_decl  void yw_key_entered_e(char keyval)
+CODE    yw_expose_decl       void yw_expose_e(void)
+CODE    yw_iconicize_decl    void yw_iconicize_e(void)
+
+y_app_vtable_t yw_entrypoints = {
+    yw_mouse_b1_e,
+    yw_mouse_b2_e,
+    yw_key_entered_e,
+    yw_expose_e,
+    yw_iconicize_e
+};
+\end{verbatim}
+\caption{Y-windows SMG Library declarations}\label{figure:y-w-lib-decls}
+\end{figure*}
+
+\begin{figure*}[h]
+\begin{verbatim}
+typedef union {
+    struct {
+        int x;
+        int y;
+    } mouse_coords;
+    char keyval;
+} yw_event_t;
+
+SM_EVT  yw_event_t *
+
+EVENT  Mouse_B1_E    yw_mouse_b1_decl    yw_mouse_b1_prep
+EVENT  Mouse_B2_E    yw_mouse_b2_decl    yw_mouse_b2_prep
+EVENT  Key_Entered_E yw_key_entered_decl yw_key_entered_prep
+EVENT  Expose_E      yw_expose_decl      yw_noarg_prep
+EVENT  Iconicize_E   yw_iconicize_decl   yw_noarg_prep
+
+CODE_{   yw_mouse_b1_prep
+// Standard event initialization; defined in CODE tag for _/xxx subst.
+#define INIT_EVT  yw_event_t *evt; \
+           evt = (void) malloc(sizeof(yw_event_t)); \
+           if (!evt) return; \
+           _/EVT = evt; \
+           _/OBJ = &myapp_global;
+
+    INIT_EVT;
+    evt->mouse_coords.x = x;
+    evt->mouse_coords.y = y;
+CODE_}
+
+CODE_{   yw_mouse_b2_prep
+    INIT_EVT;
+    evt->mouse_coords.x = x;
+    evt->mouse_coords.y = y;
+CODE_}
+
+CODE_{   yw_key_entered_prep
+    INIT_EVT;
+    evt->keyval = keyval;
+CODE_}
+
+CODE     yw_noarg_prep    INIT_EVT;
+\end{verbatim}
+\caption{Y-Windows SMG Library Event Management}\label{figure:y-w-lib-events}
+\end{figure*}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "smg_guide"
+%%% End: 

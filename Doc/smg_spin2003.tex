@@ -1,0 +1,113 @@
+\documentclass[runningheads]{llncs}
+\usepackage{float}
+\usepackage{xspace}
+\usepackage[rdkeywords]{listings}
+\usepackage{longtable}
+\usepackage{hyperref}
+
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse    % we are not running PDFLaTeX
+\else
+\pdfoutput=1    % we are running PDFLaTeX
+\pdftrue
+\fi
+
+\ifpdf
+\usepackage[pdftex]{graphicx}
+\pdfcompresslevel=9
+\else
+\usepackage{graphicx}
+\fi
+
+\lstloadlanguages{C}
+\lstset{language=C,basicstyle=\small,commentstyle=\itshape\footnotesize,texcl=true}
+
+\title{SMG - State Machine Generator}
+\titlerunning{SMG}
+\author{Kevin Quick\inst{1}}
+\institute{\email{quick@null.net}}
+\authorrunning{Quick}
+\date{Version 1.7 \\ 16 Apr 2002}
+\begin{document}
+\maketitle
+\input{smg_maindesc}
+\input{smg_kw_brief}
+\input{smg_lib}
+\input{smg_lib_example}
+
+
+\section{Dependencies}
+
+SMG is written in the Python language.  It generates output that may
+be passed to the AT\&T GraphViz utility for visualization and Promela
+output that may be passed to the AT\&T SPIN utility.  The SMG utility
+was independently developed and is not related to either the GraphViz
+utility or the SPIN utility; GraphViz and SPIN they were developed
+separately and may be obtained under their corresponding licenses at
+\code{http://www.research.att.com/sw/tools/graphviz} and
+\code{http://netlib.bell-labs.com/netlib/spin/whatispin.html},
+respectively.
+
+\section{Conclusions and Future Directions}
+
+The SMG utility has proven to be a simple and powerful tool that can
+be used to develop more maintainable and readable code, while
+simultaneously supporting concurrent functional verification using
+SPIN.  However, use of this tool has revealed some changes that would
+increase its utility:
+
+\begin{enumerate}
+\item Simpler template for common usage.  The current minimum template
+  required for SMG usage requires definitions of error functions,
+  \SMOBJ and \SMEVT structure types, and proper include sequencing.
+  \begin{itemize}
+  \item Default object and event types could be generated, enabling
+    the generation of a default error function as well to accelerate
+    the generation of SMG input.
+  \item Alternatively, SMG could have a ``template generation'' mode
+    (specified by a command argument) that generates a standard
+    minimum template automatically that can be quickly adapted to the
+    specific needs of the developer.
+  \end{itemize}
+  
+\item Control flow management.  SMG was initially designed to handle
+  the delivery of external events to a state machine, and with the
+  assumption that any event could occur at any point in the lifetime
+  of that state machine.  However, usage has indicated that it is
+  useful to correlate certain internal control flow operations to
+  events.  For example, a synchronous/blocking routine often returns
+  an indication of success or failure, and the state machine should
+  either progress to the next normal state in the former case or enter
+  an error state in the latter case.  It is possible to define events
+  that correspond to these return values and to generate these events
+  from within the code, but doing so is somewhat awkward---worse these
+  local return values become translated into global events that SMG
+  considers for {\em every} state defined.  A better method of
+  handling these localized events should be identified.
+  
+\item Handling of synchronous/blocking functions.  SMG was developed
+  primarily to handle an asynchronous non-blocking environment, and
+  the directives handle this environment very naturally.  However, the
+  prevalence of synchronous/blocking operations defined in POSIX
+  indicates that SMG should be capable of handling these situations
+  just as gracefully.  This issue is related to the Control flow
+  management item above, but there may be additional adjustments
+  needed for correct handling of blocking functions beyond just the
+  control flow events based on the function's return value.
+  
+\item Generate output for other languages.  The current SMG
+  implementation is only capable of generating ANSI C output for
+  implementing state machines.  To increase the usefulness of the
+  utility, other languages should be addressed, with the possibility
+  of allowing language definition files that can be added by end-users
+  without modifying core SMG code.  Potential languages include: Java,
+  Python, and Perl, as well as many others.
+
+\end{enumerate}
+
+Despite the above issues, however, the SMG utility is a very useable
+tool and further development and use of the tool is warranted.
+
+\end{document}
+

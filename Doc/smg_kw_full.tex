@@ -1,0 +1,672 @@
+
+\subsection{SMG Directive Keywords}
+
+This section describes {\em all} supported SMG keywords.  As noted
+previously, the initial review should focus on the subset of common
+keywords, leaving the remaining keywords for more esoteric evaluation.
+
+\input{smg_kw_syntax}
+
+\begin{description}
+  
+\item[\hypertarget{SMNAME}{\SM{NAME}}] --- Specifies the start of a
+  State Machine of the specified name.  An input \file{.sm} file(set)
+  may contain multiple state machines.  The \SM{NAME} identifies the
+  state machine to which all of the following state machine directives
+  apply until a new \SM{NAME} state machine declaration is read.
+  
+\item[\hypertarget{SMDESC}{\SM{DESC}}] --- Descriptive text describing
+  the purpose of the State Machine
+  
+\item[\hypertarget{SMOBJ}{\SM{OBJ}}] --- Type of the C object
+  representing the instantiation of the State Machine.  This object
+  persists across the lifetime of the state machine and typically
+  contains user information needed by the code containing the state
+  machine and must include an \code{sm_state} field used by the
+  SMG-output code to maintain the current state of the code.
+  
+\item[\hypertarget{SMEVT}{\SM{EVT}}] --- Type of the C object
+  associated with an event.  All information relative to the current
+  event (except the event code itself) must be contained in this
+  object. The body of the SMG-generated state machine will only have
+  access to the \SMOBJ and \SM{EVT} variables.
+  
+\item[\hypertarget{SMINCL}{\SM{INCL}}] --- Includes another file.
+  This operates in a similar manner to the \incode{#include}
+  preprocessor directive in C except that it works during the SMG
+  preprocessing stage rather than the C preprocessing stage.
+  Additionally, the optional second parameter specifies the version of
+  the file to be included.  The \SMINCL directive will look for the
+  specified file based on a search path.  The search path looks in the
+  following locations in the order specified:
+  \begin{enumerate}
+  \item The current directory
+  \item \file{/usr/local/lib/SMG/*-vN}
+    
+    This location is searched only if the optional second argument is
+    specified on the \SMINCL line specifying the version of the
+    interface.  The \file{N} in the above path is replaced with the
+    version number specified in the second argument and the \file{*}
+    specifies a wildcard of all entries.  Thus, if the optional
+    version specified is ``23'', the \SMINCL will search in all of the
+    /usr/local/lib/*-v23 directories.
+  \item \file{/usr/local/lib/SMG/*}
+    
+    All subdirectories of the above are checked.
+  \item \file{/usr/local/lib/SMG}
+  \end{enumerate}
+  
+\item[\hypertarget{SMDEF}{\SM{DEF}}] --- Defines a directive for use
+  in the \SMIF/\SMELSE/\SMEND statements.  The \SM{DEF} is roughly
+  equivalent to a C statement like the directive \incode{#define
+    <context-name>}, except that the SM versions are parsed by SMG and
+  \incode{#defines} are parsed by the C preprocessing stage of the
+  compiler, which follows SMG parsing.  One way to negate this is to
+  make it an SMG comment (see below).  This is a global directive and
+  is not related to any specific state machine or other context.
+  
+\item[\hypertarget{SMIF}{\SM{IF}}] --- Specifies the beginning of a
+  block of code that is only included if the \SMDEF statement for the
+  corresponding \smg{<context-name>} has been seen.  This is a global
+  directive and is not related to any specific state machine or other
+  context.  Blocks of code demarcated by \SMIF/\SMEND statements may
+  be nested, even within the same \smg{<context-name>}.  Each \SMEND
+  statement exits the corresponding \SMIF context but no others.
+  Context nesting is allowed but scope must be maintained.
+  
+\item[\hypertarget{SMELSE}{\SM{ELSE}}] --- Specifies the beginning of
+  an alternate block of code that is only included if the \SMDEF
+  statement for the corresponding \smg{<context-name>} has {\em not}
+  been seen.
+
+\item[\hypertarget{SMEND}{\SM{END}}] --- Specifies the end of a block
+  of statements (C and SMG) that was previously identified with the
+  \SMIF statement.
+  
+\item[\hypertarget{STATE}{\smg{STATE}}] --- Defines a state and
+  optionally a description of that state.  This directive is optional;
+  states are deduced by the SMG from \TRANS directives as needed.
+  
+\item[\hypertarget{INITSTATE}{\smg{INIT_STATE}}] --- Specifies the
+  initialization for a state machine that is initialized at
+  instantiation.  There may only be one of these for a state machine
+  although it may appear in place of or with a corresponding
+  \STATE directive for the same state.  State machines
+  instantiated in this way {\em MUST} have zeroed contents when
+  instantiated; since instantiation is external to the SMG generated
+  code, the developer must insure that the new state machine, however
+  created, is zero'ed (i.e. \code{memset(sm_obj, 0, sizeof(sm_obj))})
+  before any events are delivered to that state machine.
+  
+  State machines which are not initialized at instantiation must be
+  explicitly initialized with the \code{<name>_State_Machine_Init}
+  operation before any events are delivered to that state machine.
+  
+\item[\hypertarget{STDESC}{\smg{ST_DESC}}] --- Provides additional
+  description for the most recently declared \STATE.
+  
+\item[\hypertarget{EVENT}{\smg{EVENT}}] --- Defines an event, optional
+  entry point declaration, optional input variable preprocessing, and
+  an optional description of the event.  As with the \STATE
+  directive, the \smg{EVENT} directive is optional if no entry point
+  or preprocessing must be defined and events will be deduced as
+  needed.
+  
+  Most uses of the \smg{EVENT} keyword will specify only the
+  \smg{<event_name>}.
+  
+  In situations where an event entry point is automatically defined
+  (e.g. an \hypertarget{eventlib}{Event Library}), the optional
+  \smg{<entry-code-tag>} and \smg{<setup-code-tag>} specify the code
+  to be generated for the event handling entry point.  The
+  \smg{<setup-code-tag>} should not be defined ({\it i.e.} not
+  \smg{--}) unless the \smg{<entry-code-tag>} is also defined (in
+  other words, if \smg{<entry-code-tag>} is ``\smg{--}'' then
+  \smg{<setup-code-tag>} must also be ``\smg{--}'').
+  
+\item[\hypertarget{EVDESC}{\smg{EV_DESC}}] --- Provides additional
+  description for the most recently declared \EVENT.
+
+\item[\hypertarget{TRANS}{\smg{TRANS}}] --- Defines a transaction.
+  Specifies the handling of an Event for a specific current state in
+  terms of the new state to go to when the event is received, along
+  with any code to execute either before or after moving to the new
+  state.  The \smg{TRANS} statement is the principle specification for
+  SMG input.
+  
+  The \smg{<new-state>} may be ``\smg{--}'' to indicate that there is
+  no state change associated with this event in the current state.
+  
+  The \smg{<pre-code-tag>} and/or the \smg{<post-code-tag>} elements
+  may be ``\smg{--}'' to indicate that there is no pre-state-change or
+  post-state-change code to execute, respectively.
+  
+  The \smg{<current-state>} may be ``\smg{*}'' to indicate that the
+  transaction is a default transaction and applies to all states.
+  
+\item[\hypertarget{TRANSplus}{\smg{TRANS+}}] --- A special form of the
+  \TRANS directive.  This directive indicates that the associated
+  transaction information is defining ``group'' code that is performed
+  in addition to the normal transaction.  There must only be one
+  \TRANS for a current-state/event/destination-state transaction, but
+  there may be zero or more \smg{TRANS+} (in addition to the \TRANS)
+  for that same transaction that specify additional code.  This
+  directive is especially useful for specifying default code that is
+  associated with an event that occurs in any state (using a wildcard
+  specifier for the current-state as described below).
+  
+  Another way of describing the difference between \TRANS and
+  \smg{TRANS+} is that a multiply defined state transition error will
+  only be detected for \TRANS directives.
+  
+  The \smg{<new-state>}, \smg{<pre-code-tag>}, \smg{<post-code-tag>},
+  and \smg{<current-state>} fields may have the special values
+  described in the \TRANS directive and have the same effect.
+
+\item[\hypertarget{TRANSeq}{\smg{TRANS=}}] --- Another special form of
+  the \TRANS directive.  This form is used to indicate the normal or
+  expected transition in the current state (i.e. the primary code
+  path).  When the event described in this \smg{TRANS=} directive has
+  corresponding entry point and preprocessing code directives, the SMG
+  preprocessor outputs specific code testing for and implementing this
+  transaction before passing into the more general transaction
+  processing routine, thereby increasing the efficiency and
+  performance of the ``common path'' code.
+  
+  The \smg{<new-state>}, \smg{<pre-code-tag>}, \smg{<post-code-tag>},
+  and \smg{<current-state>} fields may have the special values
+  described in the \TRANS directive and have the same effect.
+
+\item[\smg{##}] --- When placed at the start of a line, this specifies
+  that the line is an SMG comment; SMG comments will not be reproduced
+  in the output C code.
+  
+\item[\hypertarget{CODE}{\smg{CODE}}] --- Specifies a line of code and its associated tag.
+  All code referenced by \EVENT and \TRANS directives is
+  referred to by an associated code tag; the \smg{CODE} directive
+  specifies the actual C code that is associated with that tag.
+  
+  Within the C code associated with the \smg{CODE} tag, special
+  keywords will be recognized and appropriate substitutions will be
+  made in the output C code generated.  All code-internal keywords are
+  of the form ``\code{_/xxx}'' and may be one of the following:
+
+\begin{description}
+  
+\item[\smg{_/OBJ}] --- Substitute the name of the \SMOBJ-typed
+  variable.
+  
+\item[\smg{_/EVT}] --- Substitute the name of the \SMEVT-typed
+  variable
+  
+\item[\smg{_/NAME}] --- Substitute the name of the current state machine
+  being defined.
+  
+\item[\smg{_/<STATE>}] --- Specifies that code should be inserted to set
+  the state to the specified value.  This is used for situations where
+  the destination state cannot be determined solely from the current
+  state and event.  The code which is specified for this type of
+  \TRANS operation must programmatically make the determination
+  of the appropriate target state and then set that state using the
+  ``\code{_/<STATE>}'' keyword.
+  
+\item[\smg{_/<EVENT>}] --- Specifies that the associated event should be
+  delivered to the state machine.  This event is delivered
+  {\em IMMEDIATELY} to the state machine, and is comparable to a
+  recursive invocation of the state machine.  It is possible to defer
+  the delivery of these events to the end of the handling for the
+  current event using a command-line flag, in which case they will be
+  delivered in the order they were generated after all tagged code
+  associated with the event has been executed.
+  
+  If it is desireable to queue events to a state machine instead, for
+  both external event deliveries and internally generated events, a
+  separate mechanism must be provided by the user to implement this
+  queueing.  These directives should be used {\em CAREFULLY}.
+
+\end{description}
+
+\item[\hypertarget{CODEbegin}{\smg{CODE_\{}}] --- Specifies the start
+  of a multi-line section of code and its associated tag.  This
+  directive is special in that the code associated with this directive
+  spans multiple lines, up to the closure directive.  Other than the
+  multi-line aspect, this directive is exactly like the \smg{CODE}
+  directive, including the keyword substitution activities.
+    
+\item[\hypertarget{CODEend}{\smg{CODE_\}}}] --- Specifies the end of a
+  multi-line section of code started by the \CODEbegin directive.
+  
+\item[\hypertarget{PROMELAbegin}{\smg{PROMELA_\{}}] --- Specifies the
+  start of a multi-line Promela code section.  Promela is a modeling
+  language that may be used with the Spin utility to model and
+  validate a state machine.  Promela code is output to the \file{.pml}
+  file rather than the \file{.c} and \file{.h} files for corresponding
+  \CODE segments.
+  
+  Special code tags of \smg{HEADER} and \smg{INIT} may be used to
+  specify Promela code that should be output to the header or the end
+  (init) of the Promela file.  One common initialization function is
+  to declare the Promela channel used to deliver events to the state
+  machine and then run the state machine, passing that channel.  The
+  channel messages should be declared as follows:
+  
+%  \ \ \listcode{chan send_events = [0] of \{ mtype, mtype \};}
+  
+  Where the first mtype should be either \smg{INITIALIZE_SM} or
+  \SM{EVENT} as appropriate, and the second mtype should be the
+  initial state or the event name, respective to the first mtype.  The
+  depth of the channel should always be zero to accurately model the
+  immediate delivery mechanism of the state machine; queued event
+  delivery should use a separate queueing process rather than simply
+  expanding the channel depth to provide the proper semantics.
+  
+  See the output of the examples for more information.
+  
+\item[\hypertarget{PROMELAend}{\smg{PROMELA_\}}}] --- Specifies the
+  end of a multi-line Promela code section.
+
+\end{description}
+
+
+
+\subsection{SMG Wildcards}
+
+When specifying the arguments for the SMG directives described above,
+there are special wildcards that are recognized by the SMG
+preprocessor that may be used in place of a more customary value for
+that argument:
+
+\begin{description}
+  
+\item[\smg{*}] --- Wildcard argument.  This is typically useable in
+  place of a state name in a \TRANS directive, indicating that any and
+  all states apply for that transition.  This can be useful in
+  specifying the ``default'' transition for an event, and may be
+  overridden for specific states by subsequent \TRANS directives that
+  do not use the wildcard.
+  
+\item[\smg{--}] --- No-action argument.  This indicates that nothing
+  should occur for the corresponding argument.  For example, when used
+  in place of the \smg{new_state} name in the \TRANS statement,
+  this indicates that the event does not change the current state.
+  When used in place of a code tag, it indicates that there is no code
+  to be executed.
+
+\end{description}
+
+\subsection{SMG Syntax Version}
+
+Currently the SMG directives syntax is unchanged from the original
+publicly distributed version.  In the future, the SMG directives
+syntax might need to change to accomodate additions, changes, and
+removals from the current syntax.  To allow \file{.sm} files to be
+written to conform to multiple syntax forms and/or validate the needed
+syntax to interpret the current file, SMG automatically generates one
+or more context definitions describing the syntax interpretation used
+by that \code{smg} utility.
+
+This automatically generated context definition may be checked with
+the \SMIF directive, even though no \SMDEF directive explicitly
+defined that context.
+
+Syntax extensions and additions are represented by additional
+automatically generated contexts defined simultaneously with the
+original syntax definition where the new syntax is backward-compatible
+with the original syntax.  Syntactic changes incompatible with
+previous versions will be represented by a newly unique automatic
+context definition and the lack of previous definitions.
+
+Also note that the syntax versioning supported in this manner is
+independent of the SMG utility version; multiple SMG utility versions
+might support identical syntax forms.
+
+\begin{tabular}{l|p{1.8in}}
+{\bf Context} & {\bf Description} \\\hline
+\smg{SMG_SYNTAX_A} & Original SMG syntax \\
+\end{tabular}
+
+
+\section{SMG Specification Requirements}
+
+In addition to the SMG directives described above, there are a few
+requirements for successfully integrating the generated state machine
+C code into the rest of the software module:
+
+\begin{enumerate}
+  
+\item The \SMOBJ structure must contain a field (\code{sm_state}) that
+  can be used by SMG to maintain the current state of the state
+  machine.  This field should NEVER be directly accessed by the C
+  code.
+
+   
+\item When a run-time error occurs, the generated state machine C code
+  will call an error function that must be supplied by the user-supplied
+  C code; this is so that the error handling activity can be handled
+  in a manner appropriate to the current implementation.
+  
+  The declaration for the error function to be provided by the
+  user-supplied C code is defined as the
+  \code{<SM_NAME>_State_Machine_Error} function in
+  Figure~\ref{fig:interface}.
+  
+  User-supplied code may also call the error function, but if the
+  \code{err_id} used matches the errors defined in
+  Table~\ref{table:errs} then the \code{errtext} and additional
+  parameters must additionally match.
+  
+  In the definition referenced, \code{<SM_NAME>} is replaced with the
+  name of the state machine associated with this error (allowing
+  separate error handlers for each state machine defined) and
+  \code{<SM_OBJ>} and \code{<SM_EVT>} are replaced by the
+  corresponding C type specifications from the similarly named SMG
+  directives.
+  
+  The \code{errtext} describes the error and may be followed by
+  arguments to be used in \code{printf}-style format codes.
+  
+  The \code{err_id} is an identifier value associated with this error.
+  The \code{errtext} and the type and sequence of arguments for a
+  specific \code{err_id} will never change, so error routines are free
+  to key on the \code{err_id} value to perform specific actions as
+  defined in Table~\ref{table:errs}.
+
+\begin{figure*}[tb]
+\begin{verbatim}
+void <SM_NAME>_State_Machine_Error(<SM_OBJ> _sm_obj,
+                                   <SM_EVT> _sm_evt,
+                                   int   err_id,
+                                   char *errtext, ...);
+
+void <SM_NAME>_State_Machine_Event(sm_obj, sm_evt, event_code);
+
+void <SM_NAME>_State_Machine_Init(sm_obj, initial_state);
+\end{verbatim}
+\caption{State Machine C-code Interface Declarations}
+\label{fig:interface}
+\end{figure*}
+
+\begin{table*}[tb]
+\caption{State Machine Error function \code{err_id} and \code{errtext} values}
+\label{table:errs}
+\begin{tabular}{|c|l|}
+\hline
+{\bf \code{err_id}} & {\bf \code{errtext}} \\ \hline \hline
+0 & {\it unused} \\ \hline
+1 & \code{Undefined State Transition (State <#>=<N>: <D>), (Event <#>=<N>: <D>)} \\ \hline
+2 & \code{Invalid STATE\!\! (<#>=<N>: <D>)} \\ \hline
+3 & \code{Invalid STATE/EVENT\!\! (State <#>=<N>: <D>) (Event <#>=<N>: <D>)} \\
+\hline
+ & \code{<#>} is the numeric value for the item in question \\
+ & \code{<N>} is the corresponding name string \\
+ & \code{<D>} is the corresponding description string \\
+\end{tabular}
+\end{table*}
+
+\item When C code within the user-supplied software wishes to deliver
+  an event to the state machine and therefore activate it to process
+  that event to completion, it should call the
+  \code{<SM_NAME>_State_Machine_Event} function as defined in
+  Figure~\ref{fig:interface}.
+  
+  In the definition referenced, \code{<SM_NAME>} is replaced with the
+  name of the state machine to which the event is to be delivered.
+  The \code{sm_obj} and \code{sm_evt} arguments must be the
+  appropriate entities with types defined by the \SMOBJ and \SMEVT SMG
+  directives, respectively.  The \code{event_code} must be of type
+  \code{<SM_NAME>_event_t}, where that type (and the actual event
+  codes) are defined in the include header file output by the smg
+  preprocessor.
+  
+\item For state machines which are not initialized at instantiation
+  time (i.e. which do not contain an \INITSTATE directive) the state
+  machine must be explicitly initialized before any events are
+  delivered to the state machine.  A state machine must be explicitly
+  initialized by calling the \code{<SM_NAME>_State_Machine_Init}
+  function as defined in Figure~\ref{fig:interface}.
+  
+\item The \file{.sm} file should contain a ``\incode{#include
+    "<FILE>_smdefs.h"} C statement, where \code{<FILE>} is the same as
+  the \file{.sm} input filename (without the \file{.sm} extension).
+  This header file is automatically generated by SMG and will define
+  the states, events, and various SMG entry points in C-syntax code.
+\label{item:smdef}
+  
+  This header file {\em must} be included into the \file{.sm} file at
+  a minimum, and may be included into other \file{.sm} or
+  \file{.c}/\file{.h} files in the module as needed.  Its inclusion
+  must be explicit by the developer to insure that the inclusion
+  occurs at the right point in the code (e.g. following any other
+  definitions needed by the SM definitions, but prior to actual usage
+  of those definitions in the user-supplied code).
+  
+\item The \file{_smdefs.h} inclusion in requirement \ref{item:smdef}
+  must be preceeded by any type definitions required by code
+  declarations in the \file{_smdefs.h} file, including the \SMOBJ and
+  \SMEVT types.
+  
+\item The SMG code assumes that all external calls to
+  \code{<SM_NAME>_State_Machine_Event} are externally synchronized and
+  otherwise protected against multi-thread re-entrancy.
+  
+\item Code segments are output in the order in which they are
+  specified for \TRANSplus code.  All pre-state \TRANSplus code
+  preceeds normal pre-state code, and all post-state \TRANSplus code
+  follows normal post-state code.
+
+\end{enumerate}
+
+
+\section{SMG Usage}
+
+The SMG preprocessor is invoked from the command line prior to the C
+file compilation.  It will produce a number of output files: a C code
+file (\file{.c}), a header include file (\file{.h}), a GraphViz dot
+input file (\file{.dot}), and a GraphViz output file in PostScript,
+GIF, MIF (Framemaker), or HTML imagemap format.
+
+The SMG preprocessor may be invoked with no arguments or with the
+``\code{-h}'' flag to obtain explicit usage information.
+
+
+\subsection{SMG Command Line Arguments}
+
+The following describes the command line arguments for SMG in more
+explicit detail than than provided by run-time help.
+
+\begin{description}
+  
+\item[\code{-h}] Displays the usage/help information.  Usually
+  displayed on a command-line parsing error as well.
+  
+\item[\code{-i}] Passes all generated \file{.c} and \file{.h} files
+  through the indent program to improve readability.  The current user
+  environment provides the appropriate input to indent; no indent
+  parameters are passed on the command line used to invoke indent.
+  The indent application must be present in the current \code{PATH}.
+  Note that some indent operations may cause the line numbers reported
+  during compilation to be skewed; in particular, the \code{-cdb} (GNU
+  indent) option is evil.
+  
+\item[\code{-v}] Verbose output.  Enables various informational and
+  progress messages.  If verbose output is not enabled, the SMG
+  preprocessor will not generate any messages to stdout.
+         
+\item[\code{-D}] Defer tagged code event generation.  As described
+  above, a \TRANS directive may specify one or more tags identifying
+  code that is to be generated for handling that event, and that code
+  may contain keywords of the type ``\incode{_#<event>}'' or
+  ``\incode{_/<event>}'' where \code{<event>} is a valid event for
+  this state machine.  Normally, the keyword will be directly replaced
+  with appropriate code to generate the specified event, but if the
+  \code{-D} flag is used, the code to generate the event will be
+  placed at the end of the \TRANS code segments.
+  
+\item[\code{-N}] Nested switch statements for state machine handling.
+  When an event occurs, there are two elements which are used to
+  determine the appropriate handling of that event: the event code
+  itself and the current state.  By default, these two values are
+  combined and a singe C switch/case statement is generated to
+  dispatch to the appropriate handling.  When the \code{-N} flag is
+  utilized, one C switch/case statement is used to scan for the
+  current state, and then within the case handling for that state,
+  another C switch/case statement is used to scan for the
+  \code{event_code}.
+  
+\item[\code{-T}] Trace code output.  When this flag is specified,
+  state machine trace operations are embedded in the generated code.
+  This is typically used for debugging and may or may not be specified
+  for ``production'' versions of the code.  More information on
+  tracing is provided in Section~\ref{section:tracing}.
+         
+\item[\code{-e}] Enum declarations.  By default, the
+  \file{XXX_smdefs.h} file generated uses \incode{#define} statements
+  for states and events.  When the \code{-e} flag is specified,
+  \code{enum} statements are generated instead.
+         
+\item[\code{-b}] Bounds checking.  Adds code to the state machine
+  event handler to validate the event value for validity as an actual
+  event code.
+  
+\item[\code{-E}] Embedded code.  This causes SMG to output code
+  suitable for use in an embedded environment.  This code will not
+  contain the functions to translate a state or event to its
+  corresponding string name or string description, and calls to the
+  error function will pass an empty string as the errtext argument.
+  Also note that it is improper to use tracing (\code{-T}) with
+  embeddable output; the result will not compile because the tracing
+  code requires the suppressed translation routines.
+         
+\item[\code{-l}] Suppress \incode{#line} directives.  By default, the
+  generated code contains ``\incode{#line}'' C precompiler directives
+  that reference the input SMG file.  This greatly aids in debugging
+  as the compilation stage will usually reference the correct location
+  in the input SMG file rather than the generated (and therefore
+  somewhat unfamiliar) C file.  By specifying the \code{-l} flag,
+  these directives are suppressed and any C compiler messages will
+  refer to the \file{.c} file instead; this may be useful for
+  debugging errors that are not apparent in the SMG input file
+  directly.
+  
+\item[\code{-G}] GIF diagram output format.  Specifies that the state
+  machine diagram that is generated is to be encoded in GIF format.
+         
+\item[\code{-P}] Postscript diagram output format.  Specifies that the
+  state machine diagram that is generated is to be encoded in
+  Postscript format.  This is the default.
+         
+\item[\code{-M}] MIF diagram output format.  Specifies that the state
+  machine diagram that is generated is to be encoded in MIF format
+  (Adobe FrameMaker's Interchange Format).
+         
+\item[\code{-W}] Web imap diagram output format.  Specifes that the
+  state machine diagram that is generated is to be encoded as an html
+  image map suitable for use on a Web page.
+
+\end{description}
+
+
+\subsection{Support Functions}
+
+The SMG utility will automatically generate a set of support functions
+in addition to the primary \code{<name>_State_Machine_Init} and
+\code{<name>_State_Machine_Event} functions.  These support functions
+may be used by the user's event-specific code or other code to obtain
+user-readable names and descriptions of the States and Events defined
+in the \file{.sm} file.
+
+The following support functions (defined in
+Figure~\ref{fig:support-functions}) are generated automatically by
+SMG:
+
+\begin{figure*}
+\begin{verbatim}
+char *<name>_State_Name(<name>_state_t state);
+char *<name>_State_Desc(<name>_state_t state);
+char *<name>_Event_Name(<name>_event_t event);
+char *<name>_Event_Desc(<name)_event_t event);
+\end{verbatim}
+\caption{SMG Auto-generated Support Functions}\label{fig:support-functions}
+\end{figure*}
+
+\begin{description}
+\item[\code{<name>_State_Name}] This function converts its state value
+  argument into a character string name for that state.
+\item[\code{<name>_State_Desc}] This function converts its state value
+  argument into a character string description for that state.
+\item[\code{<name>_Event_Name}] This function converts its event value
+  argument into a character string name for that event.
+\item[\code{<name>_Event_Desc}] This function converts its event value
+  argument into a character string description for that event.
+\end{description}
+
+Note that the generation of these support functions is suppressed when
+the \code{-E} argument is used to request embeddable output code.
+
+\input{smg_trace_intro}
+
+Some environments do not provide fprintf access to a stderr output
+stream, and other situations might desire custom control over the
+tracing output.  These scenarios can be handled by overriding the
+default tracing code generated.  The overrides are specified in the
+form of a set of \code{#define} statements in the \file{.sm} file.
+These \code{#define} statements should appear fairly early in the
+\file{.sm} file, and must appear before the inclusion of the
+\file{xxx_smdefs.h} file.
+
+The following macros should be overridden with specific \code{#define}
+statements to modify the tracing behavior:
+
+\begin{description}
+\item[\code{SM_TRACE}] This macro should be defined to signal an
+  override of the default tracing functionality generated by SMG.
+  This macro does not need to be set to a specific value or
+  translation: it simply needs to be defined.
+\item[\code{SM_TRACE_INIT}] This macro is called when the state
+  machine is initialized.  This macro can be used to trace the
+  initialization event and the initial state of the state machine.
+  The parameters for this macro are:
+  \begin{description}
+  \item[\code{Obj}] The \code{_/OBJ} variable for the state machine
+    context.  (Type: declared by the \SMOBJ directive).
+  \item[\code{Evt}] The \code{_/EVT} variable for this event.  (Type:
+    declared by the \SMEVT directive).
+  \item[\code{SM_Name}] The \SMNAME of the state machine.  (Type:
+    \code{char *}).
+  \item[\code{InitState}] The initial state value.  The
+    \code{<name>_State_Name} and \code{<name>_State_Desc} support
+    functions may be called to translate the state value into an
+    identifying string and corresponding description if desired.
+    (Type: \code{<name>_state_t})
+  \end{description}
+\item[\code{SM_TRACE_EVENT}] This macro is called when an event
+  occurs.  This macro should identify the event which occurred and the
+  new state of the State Machine.  The parameters for this macro are:
+  \begin{description}
+  \item[\code{Obj}] The \code{_/OBJ} variable for the state machine
+    context.  (Type: declared by the \SMOBJ directive).
+  \item[\code{Evt}] The \code{_/EVT} variable for this event.  (Type:
+    declared by the \SMEVT directive).
+  \item[\code{SMNAME}] The \SMNAME of the state machine.  (Type:
+    \code{char *}).
+  \item[\code{Event}] The event value.  The \code{<name>_Event_Name}
+    and \code{<name>_Event_Desc} support functions may be called to
+    translate the event value into an identifying string and
+    corresponding description if desired.  The new state value is
+    available from \code{_/OBJ->sm_state} and it may likewise be
+    converted to readble strings by the corresponding support
+    functions.  (Type: \code{<name>_event_t})
+  \end{description}
+\item[\code{SM_TRACE_EXP_EV}] This macro is called when an expected
+  event occurs ({\it i.e.} an event transition declared with a
+  \TRANSeq directive).  This macro is otherwise identical to the
+  \code{SM_TRACE_EVENT} macro, including the arguments, but this macro
+  may wish to differentiate the occurrence of an expected event from
+  the occurence of a normal event in the generated trace output.
+\end{description}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "smg_guide"
+%%% End: 

@@ -1,0 +1,69 @@
+The syntax of SMG Directives is described in Figure~\ref{fig:syntax}.
+In the figure, \smg{<xxx>} represents a user-supplied word, and
+\smg{<xxx>...}  represents one or more user-supplied words.  Square
+braces ('[' and ']') enclose optional portions of the directive and
+are not actually present in the directive.  There are no restrictions
+on \smg{<xxx>} words except those noted here and excepting whitespace.
+Some \smg{<xxx>} words must be valid C identifiers:
+\smg{<state-machine-name>}, \smg{<state-name>}, and
+\smg{<event-name>}.
+
+All SMG directives are line oriented, must be contained on a single
+line, and must start with the SMG directive keyword at the first
+character on the line.  The remainder of the line contains the
+arguments and values for the SMG directive as whitespace separated
+words, up to the end of the line; SMG directives do not support
+line-continuation.
+
+\begin{figure*}[p]
+\begin{verbatim}
+
+SM_NAME <state-machine-name>
+
+SM_DESC <description>...
+
+SM_OBJ  <C-type>...
+
+SM_EVT  <C-type>...
+
+SM_INCL <filename>
+
+SM_DEF  <context-name>
+SM_IF   <context-name>
+SM_ELSE <context-name>
+SM_END  <context-name>
+
+STATE   <state-name> [ <description>... ]
+
+INIT_STATE <state-name> [ <description>... ]
+
+ST_DESC <description>...
+
+EVENT <event-name> [ <entry-code-tag> <setup-code-tag> [ <description...> ] ]
+
+EV_DESC <description>...
+
+TRANS  <current-state> <event> <new-state> [ [<pre-code>] <post-code> ]
+TRANS+ <current-state> <event> <new-state> [ [<pre-code>] <post-code> ]
+TRANS= <current-state> <event> <new-state> [ [<pre-code>] <post-code> ]
+
+## <comment>...
+
+CODE    <code-tag> <code>...
+
+CODE_{  <code-tag>
+CODE_}
+
+PROMELA_{      <code-tag>|HEADER|INIT
+PROMELA_}
+
+\end{verbatim}
+\caption{SMG Directive Syntax}
+\label{fig:syntax}
+\end{figure*}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "smg_guide"
+%%% End: 

@@ -1,0 +1,141 @@
+\section{SMG Libraries}
+
+An interesting and useful extension of SMG usage is as a new method
+for defining interface libraries, especially for asynchronous
+event--driven interfaces.  SMG features that make it very useful in
+working with event--driven architectures.  Event--driven architectures
+are often asynchronous by nature and lend themselves to state machine
+management techniques, but SMG has the ability to specify entry points
+and setup code for those asynchronous entry points as an SMG Library
+that can be included into the applications SMG specification using the
+\SMINCL directive.
+
+\subsection{Event Interface Background}
+
+For example, consider a hypothetical windowing environment called "Y".
+Applications written for Y-windows must specify functions that are
+called when certain events occur within their window.  The following
+events must be handled by a Y-windows application:
+
+\begin{itemize}
+\item Mouse click, Button 1
+\item Mouse click, Button 2
+\item Keyboard key entered
+\item Expose event (the window has become visible)
+\item Iconify event (the window should be iconicized)
+\end{itemize}
+
+For a C development environment, there would be a Y-windows header file
+that defined these events and an event vector structure that would have
+to be initialized by the application:
+
+\begin{verbatim}
+
+typedef struct y_app_vtable {
+      void *y_mouse_b1(int x, int y);
+      // tricky: arguments switched:
+      void *y_mouse_b2(int y, int x);
+      void *y_key_entered(char keyval);
+      void *y_expose(void);
+      void *y_iconicize(void);
+}  y_app_vtable_t;
+
+int y_app_mainloop(void);
+
+\end{verbatim}
+
+The Y-windows application would then need to define functions to be
+entered into the \code{y_app_vtable_t} to handle the various events.
+The application would also need to call \code{y_app_mainloop} in its
+main routine after initializing so that Y-windows could begin processing
+events and passing them to the application's handling functions.
+
+The inconvenience of this methodology is that the process of creating
+the entry functions is a tedious, mechanical process that each Y-windows
+application must perform.  This is exacerbated by the fact that the first
+thing that each entry point must do is check the global state to see how
+the event should be handled.  For example, \file{myapp.c} would contain
+the following minimum code irrespective of the specifics of the application:
+
+\begin{verbatim}
+
+void myapp_mouse_b1(int x, int y) {
+    switch (app_state) {
+    case STATE_1:
+          <some code>
+          break;
+    case STATE_2:
+          <some code>
+          break;
+          :
+    }
+}
+
+void myapp_mouse_b2(int y, int x) {
+    switch (app_state) {
+    case STATE_1:
+          <some code>
+          break;
+    case STATE_2:
+          <some code>
+          break;
+          :
+    }
+}
+
+void myapp_key_entered(char keyval) {
+      // same as above...
+}
+
+void myapp_exposed(void) {
+      // same as above...
+}
+
+void myapp_iconicize(void) {
+      // same as above...
+}
+
+\end{verbatim}
+
+
+Instead of exposing the developer to the tedium of manually writing
+this template an SMG Library can be provided for Y-windows. This also
+removes the risk of entering it incorrectly, (eg. as \code{void
+  myapp_mouse_b1(int y, int x)} which is syntactically but not
+functionally correct).
+
+
+\subsection{SMG Library Implementation}
+
+An SMG Library is nothing more than an SMG file that should be \SMINCL
+included into the main application and which defines the events and entry
+points for those events.  This library can be developed once and re-used
+by all applications that operate within that event-driven architecture.
+The application developer is freed to focus on the actual functionality
+of the application in response to the events rather than the mechanics
+of program infrastructure.
+
+A subset of the example above can be used to show how the introduction
+of an SMG Library changes the development.  The initial introduction
+of the SMG Library generated state machine would replace all the
+switch statements in the example above into calls to the
+\code{myapp_State_Machine_Event} function, thereby saving some of the
+superfluous repetition, but also making the entry points mere shells:
+
+\begin{verbatim}
+void myapp_iconicize(void) {
+    myapp_State_Machine_Event(&myapp_global,
+                              <event_obj>,
+                              Iconicize_E);
+}
+\end{verbatim}
+
+Because the state machine function will vector the code to the proper
+handling code, the entry point function needs to do little more than marshall the entry points arguments into the \SMEVT object and call the
+SMG's state machine function.  
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "smg_guide"
+%%% End: 

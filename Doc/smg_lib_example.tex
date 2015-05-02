@@ -1,0 +1,132 @@
+Notice that this library contains SMG directives but that it does {\em
+not} specify a complete state machine...it does not even name the state
+machine itself.  The directives defined in the library are meant to be
+embedded in the user's application state machine definition along with
+the actual event handling code.  To continue the previous example, code
+for a trivial Y-windows application is shown in the following Figures:
+
+\begin{itemize}
+\item Figure~\ref{figure:y-app-decl} shows the application's declarations
+\item Figure~\ref{figure:y-app-ecode} shows the event-specific routines
+\item Figure~\ref{figure:y-app-trans} shows the state machine transitions
+\item Figure~\ref{figure:y-app-main} shows the main routines
+\end{itemize}
+
+The code shown in these figures can be concatenated in order into a
+\file{.sm} source file and handled directly by SMG and a C compiler to
+generate the sample application.
+
+\begin{figure*}[h]
+\begin{verbatim}
+#include <stdio.h>
+#include <ywindows.h>
+#include "myapp_smdefs.h"
+
+SM_NAME  myapp
+
+struct myapp_gstruct {
+    sm_state_t sm_state;
+} myapp_global;
+SM_OBJ struct myapp_gstruct *
+
+SM_INCL  Y_Windows.sm
+\end{verbatim}
+\caption{Y-windows Application declarations}\label{figure:y-app-decl}
+\end{figure*}
+
+\begin{figure*}
+\begin{verbatim}
+CODE_{ draw_window
+        [user code here]
+        free(_/EVT);
+CODE_}
+
+CODE_{  draw_icon
+        [user code here]
+        free(_/EVT);
+CODE_}
+
+CODE_{  add_char
+        y_window.text.add(_/EVT->keyval);
+        free(_/EVT);
+CODE_}
+\end{verbatim}
+\caption{Y-windows Application event handling routines}\label{figure:y-app-ecode}
+\end{figure*}
+
+\begin{figure*}
+\begin{verbatim}
+INIT_STATE NotDisplayed
+TRANS NotDisplayed Expose_E       Displayed   draw_window
+TRANS Displayed    Expose_E       -           draw_window
+TRANS Iconicized   Expose_E       Displayed   draw_window
+
+TRANS Displayed    Iconicize_E    Iconicized  draw_icon
+TRANS Displayed    Key_Entered_E  -           add_char
+TRANS Iconicized   Key_Entered_E  -
+
+TRANS Displayed    Mouse_B1_E     -
+TRANS Iconicized   Mouse_B1_E     Displayed   draw_window
+TRANS Iconicized   Mouse_B2_E     -
+TRANS Displayed    Mouse_B2_E     Iconicized  draw_icon
+\end{verbatim}
+\caption{Y-windows Application state machine transitions}\label{figure:y-app-trans}
+\end{figure*}
+
+\begin{figure*}
+\begin{verbatim}
+int main(int argc, char **argv) {
+    myapp_State_Machine_Init(XXX);
+    y_window_create(...);
+    ...
+    y_app_mainloop();
+}
+\end{verbatim}
+\caption{Y-windows Application main code}\label{figure:y-app-main}
+\end{figure*}
+
+
+\subsection{Library Synthesized Events}
+
+Some types of entry points are passed a parameter which further
+defines the actual event which occurred.  For example, instead of
+\code{y_mouse_b1} and \code{y_mouse_b2}, the Y-windows system could have
+just defined:
+
+\begin{verbatim}
+typedef enum { Mouse_B1, Mouse_B2 } MButton_t;
+
+void *y_mouse(MButton_t button, int x, int y);
+\end{verbatim}
+
+In cases like this, the event-specific handling must usually be different
+based on the actual event which occurred as indicated by the ``sub-event''
+parameter.  Rather than require the developer to perform this additional
+selection based on the sub-event, the SMG Library often provides a
+synthesized event for each of the sub-event types.  In this example
+this means that the SMG Y-Windows Library would probably still provide
+\code{y_mouse_b1} and \code{y_mouse_b2} events even though the actual
+event delivered to the application was simply a \code{y_mouse} event.
+
+\subsection{SMG Library Requirements}
+
+Using an SMG LIbrary for code development means that the normal SMG development requirements apply plus those specific to the SMG Library.  More specifically, the SMG Library must define for the user:
+
+\begin{enumerate}
+\item the names of the events (including synthesized events), 
+\item the name and definition for the event structure, and 
+\item the names of the event and object variables declared by the entry points for the user's event handling code.
+\end{enumerate}
+
+
+\section{SMG Examples}
+
+Please see the Examples directory of the SMG distribution for examples
+and discussions of the use of most of the state machine directives and
+options in fairly simple programs.
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "smg_guide"
+%%% TeX-master: "smg_guide"
+%%% End: 

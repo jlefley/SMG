@@ -1,0 +1,166 @@
+
+\subsection{File Example 1}
+
+This example shows a simple example of a menu-driven file processing
+application that has an underspecified state machine.  
+
+The example is located in the \file{Examples/file_ex1} subdirectory of
+the SMG distribution.  The following sequence of events may be used to
+work with this example:
+
+\begin{center}
+\begin{picture}(60,70)(0,0)
+
+\put(17,55){\href{Examples/file_ex1/file_ex1.sm}{\framebox(26,15){\shortstack[l]{...\\\code{C code}\\\code{SM directives}\\...}}}}
+%\put(17,55){\framebox(26,15){\shortstack[l]{...\\\code{C code}\\\code{SM directives}\\...}}}
+\put(46,62){\href{Examples/file_ex1/file_ex1.sm}{.sm}}
+
+\put(30,55){\vector(0,-1){5}}
+
+\put(31,46){\oval(13,7)[c]}
+  \put(27,45){\href{Examples/file_ex1/file_ex1.log}{SMG}}
+%  \put(30,40){\line(0,1){2}}
+\put(30,42){\vector(-2,-1){11}}
+  \put(0,32){\href{Examples/file_ex1/file_ex1_smdefs.h}{\file{xxx_smdefs.h}}}
+\put(30,42){\vector(0,-1){6}}
+  \put(28,32){\href{Examples/file_ex1/file_ex1.c}{\file{.c}}}
+\put(30,42){\vector(2,-1){11}}
+  \put(38,32){\href{Examples/file_ex1/file_ex1S.dot}{\file{.dot}}}
+\put(30,42){\vector(4,-1){30}}
+  \put(59,32){\href{Examples/file_ex1/file_ex1.pml}{\file{.pml}}}%52
+
+\put(20,21){\oval(8,6)[c]}
+    \put(17,20){\hyperlink{filex1smg}{CC}}
+    \put(16,30){\vector(1,-3){2}}
+    \put(30,30){\vector(-1,-1){7}}
+\put(16,10){\file{.exe}}
+    \put(20,18){\vector(0,-1){5}}
+
+\put(43,21){\oval(18,6)[c]}
+    \put(36,20){\hyperlink{GraphViz}{GraphViz}}
+    \put(42,30){\vector(0,-1){6}}
+\put(38,10){\href{Examples/file_ex1/file_ex1S.ps}{\file{.ps}}}
+    \put(42,18){\vector(0,-1){5}}
+
+\put(61,21){\oval(10,6)[c]}
+    \put(58,20){\hyperlink{Spin}{Spin}}
+    \put(61,30){\vector(0,-1){6}}
+\put(56,7){\shortstack{Verification\\Report}}
+    \put(61,18){\vector(0,-1){5}}
+\end{picture}
+\end{center}
+
+\hypertarget{filex1smg}{\subsubsection{Building the Example}}
+
+In the following example, the commands entered are shown in {\tt\it italics} and the output of the utilities is shown in {\tt this font}.
+\begin{verbatim}
+$ smg -viTP file_ex1
+$ gcc -o file_ex1 file_ex1.c
+\end{verbatim}
+
+Once built, it may be run by executing:
+
+\begin{verbatim}
+$ file_ex1
+\end{verbatim}
+
+In addition to the executable, the source files (\file{file_ex1.c} and
+\file{file_ex1_smdefs.h}) may be examined.  There is also a Promela
+model generated (\file{file_ex1.pml}) and a graphical representation
+of the state machine
+(\href{Examples/file_ex1/file_ex1S.ps}{\file{file_ex1S.ps}}) based on
+GraphViz directives (\file{file_ex1S.dot}).
+
+Examining the graphical representation, it can easily be observed that
+the state machine is underspecified by the presence of the
+\smg{UNDEFINED_TRANSITION_RESULT} state.  This can be confirmed by
+performing a sequence of menu operations with the executable that lead
+to this error state and observing the output dynamically.
+
+%%\newsavebox{\fileex1fig}
+%%\sbox{\fileex1fig}{\includegraphics{file_ex1S.ps}}
+%\begin{figure*}
+%%\begin{center}\usebox{\fileex1fig}\end{center}
+%\begin{center}\includegraphics{file_ex1S}\end{center}
+%\end{figure*}
+
+
+\subsection{Unmorse Example}
+
+This example shows the use of an SMG-generated state machine for
+translating from Morse Code back to plain-text.
+
+The example is located in the \file{Examples/unmorse} subdirectory of
+the SMG distribution.  The following sequence of events may be used to
+work with this example:
+
+\begin{center}
+\begin{picture}(60,70)(0,0)
+
+\put(17,55){\href{Examples/unmorse/unmorse.sm}{\framebox(26,15){\shortstack[l]{...\\\code{C code}\\\code{SM directives}\\...}}}}
+%\put(17,55){\framebox(26,15){\shortstack[l]{...\\\code{C code}\\\code{SM directives}\\...}}}
+\put(46,62){\href{Examples/unmorse/unmorse.sm}{.sm}}
+
+\put(30,55){\vector(0,-1){5}}
+
+\put(31,46){\oval(13,7)[c]}
+  \put(27,45){\href{Examples/unmorse/unmorse.log}{SMG}}
+%  \put(30,40){\line(0,1){2}}
+\put(30,42){\vector(-2,-1){11}}
+  \put(0,32){\href{Examples/unmorse/unmorse_smdefs.h}{\file{xxx_smdefs.h}}}
+\put(30,42){\vector(0,-1){6}}
+  \put(28,32){\href{Examples/unmorse/unmorse.c}{\file{.c}}}
+\put(30,42){\vector(2,-1){11}}
+  \put(38,32){\href{Examples/unmorse/unmorseS.dot}{\file{.dot}}}
+\put(30,42){\vector(4,-1){30}}
+  \put(59,32){\href{Examples/unmorse/unmorse.pml}{\file{.pml}}}%52
+
+\put(20,21){\oval(8,6)[c]}
+    \put(17,20){\hyperlink{filex1smg}{CC}}
+    \put(16,30){\vector(1,-3){2}}
+    \put(30,30){\vector(-1,-1){7}}
+\put(16,10){\file{.exe}}
+    \put(20,18){\vector(0,-1){5}}
+
+\put(43,21){\oval(18,6)[c]}
+    \put(36,20){\hyperlink{GraphViz}{GraphViz}}
+    \put(42,30){\vector(0,-1){6}}
+\put(38,10){\href{Examples/unmorse/unmorseS.ps}{\file{.ps}}}
+    \put(42,18){\vector(0,-1){5}}
+
+\put(61,21){\oval(10,6)[c]}
+    \put(58,20){\hyperlink{Spin}{Spin}}
+    \put(61,30){\vector(0,-1){6}}
+\put(56,7){\shortstack{Verification\\Report}}
+    \put(61,18){\vector(0,-1){5}}
+\end{picture}
+\end{center}
+
+\hypertarget{filex1smg}{\subsubsection{Building the Example}}
+
+In the following example, the commands entered are shown in {\tt\it italics} and the output of the utilities is shown in {\tt this font}.
+\begin{verbatim}
+$ smg -viTP unmorse
+$ gcc -o unmorse unmorse.c
+\end{verbatim}
+
+Once built, it may be run by executing:
+
+\begin{verbatim}
+$ unmorse '- . ... - -..-. .---- .-.-.-'
+Translation: TEST/1.
+$
+\end{verbatim}
+
+In addition to the executable, the source files (\file{unmorse.c} and
+\file{unmorse_smdefs.h}) may be examined.  There is also a Promela
+model generated (\file{unmorse.pml}) and a graphical representation
+of the state machine
+(\href{Examples/unmorse/unmorseS.ps}{\file{unmorseS.ps}}) based on
+GraphViz directives (\file{unmorseS.dot}).
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "smg_guide"
+%%% End: 
