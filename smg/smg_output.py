@@ -127,7 +127,7 @@ char *%(sm_name)s_Event_Desc(%(sm_name)s_event_t event);  /* Get Event Desc */
 void %(sm_name)s_State_Machine_Error( %(sm_obj_type)s _/OBJ,
                                       %(sm_evt_type)s _/EVT,
                                       int err_id,
-                                      char *errtext,
+                                      const char *errtext,
                                       ... );
                                       
 
