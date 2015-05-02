@@ -1700,6 +1700,7 @@ def show_usage():
     print '       -G = GIF figure output'
     print '       -M = MIF (FrameMaker) figure output'
     print '       -P = Postscript figure output (default)'
+    print '       -F = PDF figure output'
     print '       -W = imap (HTML imagemap) figure output'
     print '       ____________SM Input files______________________'
     print '       filename = name of .sm file(s) to process'
@@ -1718,6 +1719,7 @@ if __name__ == "__main__":
                 elif opt == 'M': adjust_control("GViz_Output", "mif")
                 elif opt == 'N': adjust_control("Nested_Switch", 1)
                 elif opt == 'P': adjust_control("GViz_Output", "ps")
+                elif opt == 'F': adjust_control("GViz_Output", "pdf")
                 elif opt == 'T': adjust_control("Trace_Events", 1)
                 elif opt == 'W': adjust_control("GViz_Output", "imap")
                 elif opt == 'e': adjust_control("Use_Enums", 1)
