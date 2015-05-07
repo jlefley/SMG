@@ -1238,7 +1238,7 @@ class smg_state_machine:
                                                                  event.desc()))
             outdesc.write('    default: return "??unknown??";\n    }\n')
             outdesc.write("}\n\n\n")
-        
+
 
         outdesc.write("void\n%s_State_Machine_Event(\n"%self._name)
         outdesc.write("    %s %s,\n"%(self._objt, XL("_/OBJ")))
@@ -1247,8 +1247,7 @@ class smg_state_machine:
         outdesc.write("    )\n{\n")
 
         if check_control("Trace_Events"):
-            outdesc.write('    SM_TRACE_EVENT(%s, %s, %s, event_code);\n\n'%(
-                XL("_/OBJ") , XL("_/EVT"), self._name))
+            outdesc.write('    int old_state = %s->sm_state;\n\n'%(XL("_/OBJ")))
 
         if check_control("Bounds_Check"):
             outdesc.write('    if (event_code <= %s_EVENT_LOW_FENCEPOST ||\n'%(
@@ -1272,7 +1271,13 @@ class smg_state_machine:
         else:
             err_id = 3
         write_sm_error(outdesc, err_id, self._name)
-        outdesc.write("    }\n}\n\n\n")
+        outdesc.write("    }\n")
+
+        if check_control("Trace_Events"):
+            outdesc.write('    SM_TRACE_EVENT(%s, %s, %s, event_code, old_state);\n\n'%(
+                XL("_/OBJ") , XL("_/EVT"), self._name))
+
+        outdesc.write("}\n\n\n")
 
 
         for event in self._events:
