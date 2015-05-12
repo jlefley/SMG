@@ -140,7 +140,12 @@ void %(sm_name)s_State_Machine_Event( %(sm_obj_type)s _sm_obj,
 #define SM_TRACE_INIT(Obj, Evt, SM_Name, InitState) \\
         printf("** SM %%s 0x%%x: State %%d-%%s  INIT\\n", \\
                #SM_Name, Obj, InitState, SM_Name##_State_Name(InitState));
-#define SM_TRACE_EVENT(Obj, Evt, SM_Name, Event, OldState) \\
+#define SM_TRACE_EVENT(Obj, Evt, SM_Name, Event) \\
+        printf("** SM %%s 0x%%x: State %%d=%%s -- Event %%d=%%s\\n", \\
+               #SM_Name, Obj, \\
+               Obj->sm_state, SM_Name##_State_Name(Obj->sm_state), \\
+               Event, SM_Name##_Event_Name(Event));
+#define SM_TRACE_POST_EVENT(Obj, Evt, SM_Name, Event) \\
         printf("** SM %%s 0x%%x: State %%d=%%s -- Event %%d=%%s\\n", \\
                #SM_Name, Obj, \\
                Obj->sm_state, SM_Name##_State_Name(Obj->sm_state), \\
