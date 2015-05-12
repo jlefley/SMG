@@ -1201,42 +1201,45 @@ class smg_state_machine:
                 XL("_/OBJ")))
 
         if not check_control("Embedded"):
-            outdesc.write("char *\n%s_State_Name(%s_state_t state)\n{\n"%(
-                self._name, self._name))
+            return_type = ["const char*", "const PROGMEM char*"][check_control('Program_Space_Strings')]
+            format_string = ['"%s"', 'PSTR("%s")'][check_control('Program_Space_Strings')]
+
+            outdesc.write("%s\n%s_State_Name(%s_state_t state)\n{\n"%(
+                return_type, self._name, self._name))
             outdesc.write("    switch (state) {\n")
             for state in self._states.values():
-                outdesc.write('        case %s: return "%s";\n'%(state.name(),
-                                                                 state.name()))
-            outdesc.write('    default: return "??unknown??";\n    }\n')
+                outdesc.write('        case %s: return %s;\n'%(state.name(),
+                                                               format_string%state.name()))
+            outdesc.write('    default: return %s;\n    }\n'%(format_string%"??unknown??"))
             outdesc.write("}\n\n\n")
 
-            outdesc.write("char *\n%s_State_Desc(%s_state_t state)\n{\n"%(
-                self._name, self._name))
+            outdesc.write("%s\n%s_State_Desc(%s_state_t state)\n{\n"%(
+                return_type, self._name, self._name))
             outdesc.write("    switch (state) {\n")
             for state in self._states.values():
-                outdesc.write('        case %s: return "%s";\n'%(state.name(),
-                                                                 state.desc()))
-            outdesc.write('    default: return "??unknown??";\n    }\n')
+                outdesc.write('        case %s: return %s;\n'%(state.name(),
+                                                               format_string%state.desc()))
+            outdesc.write('    default: return %s;\n    }\n'%(format_string%"??unknown??"))
             outdesc.write("}\n\n\n")
 
 
-            outdesc.write("char *\n%s_Event_Name(%s_event_t event)\n{\n"%(
-                self._name, self._name))
+            outdesc.write("%s\n%s_Event_Name(%s_event_t event)\n{\n"%(
+                return_type, self._name, self._name))
             outdesc.write("    switch (event) {\n")
 
             for event in self._events:
-                outdesc.write('        case %s: return "%s";\n'%(event.name(),
-                                                                 event.name()))
-            outdesc.write('    default: return "??unknown??";\n    }\n')
+                outdesc.write('        case %s: return %s;\n'%(event.name(),
+                                                               format_string%event.name()))
+            outdesc.write('    default: return %s;\n    }\n'%(format_string%"??unknown??"))
             outdesc.write("}\n\n\n")
 
-            outdesc.write("char *\n%s_Event_Desc(%s_event_t event)\n{\n"%(
-                self._name, self._name))
+            outdesc.write("%s\n%s_Event_Desc(%s_event_t event)\n{\n"%(
+                return_type, self._name, self._name))
             outdesc.write("    switch (event) {\n")
             for event in self._events:
-                outdesc.write('        case %s: return "%s";\n'%(event.name(),
-                                                                 event.desc()))
-            outdesc.write('    default: return "??unknown??";\n    }\n')
+                outdesc.write('        case %s: return %s;\n'%(event.name(),
+                                                               format_string%event.desc()))
+            outdesc.write('    default: return %s;\n    }\n'%(format_string%"??unknown??"))
             outdesc.write("}\n\n\n")
         
 
@@ -1701,7 +1704,8 @@ def show_usage():
     print '       -e = Enum definitions for states and events (single-domain)'
     print '       -l = No #line specifications for .sm file in output file'
     print '       -b = Add bounds checking for incoming event values'
-    print '       -E = Embeddable code (no strings, small size, no stdlibs'
+    print '       -E = Embeddable code (no strings, small size, no stdlibs)'
+    print '       -p = Place strings in program space (AVR libc)'
     print '       ____________SM Figure generation options________'
     print '       -G = GIF figure output'
     print '       -M = MIF (FrameMaker) figure output'
@@ -1734,6 +1738,7 @@ if __name__ == "__main__":
                 elif opt == 'v': adjust_control("Verbose", 1)
                 elif opt == 'b': adjust_control("Bounds_Check", 1)
                 elif opt == 'E': adjust_control("Embedded", 1)
+                elif opt == 'p': adjust_control("Program_Space_Strings", 1)
                 elif opt == 'h': show_usage()
                 else:
                     print 'Unknown option: %s\n'%opt

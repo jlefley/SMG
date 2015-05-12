@@ -79,12 +79,14 @@ typedef enum {
 #define SM_S_E(S,E)  ((int)(S) + (int)(E))
     """, ""][nested_switch];
 
+    tdefs_return_type = ["const char*", "const PROGMEM char*"][check_control('Program_Space_Strings')]
+
     tdefs = [ """
-char *%(sm_name)s_State_Name(%(sm_name)s_state_t state);  /* Get State Name */
-char *%(sm_name)s_State_Desc(%(sm_name)s_state_t state);  /* Get State Desc */
-char *%(sm_name)s_Event_Name(%(sm_name)s_event_t event);  /* Get Event Name */
-char *%(sm_name)s_Event_Desc(%(sm_name)s_event_t event);  /* Get Event Desc */
-"""%{'sm_name':sm_name}, ""][check_control('Embedded')]
+%(return_type)s %(sm_name)s_State_Name(%(sm_name)s_state_t state);  /* Get State Name */
+%(return_type)s %(sm_name)s_State_Desc(%(sm_name)s_state_t state);  /* Get State Desc */
+%(return_type)s %(sm_name)s_Event_Name(%(sm_name)s_event_t event);  /* Get Event Name */
+%(return_type)s %(sm_name)s_Event_Desc(%(sm_name)s_event_t event);  /* Get Event Desc */
+"""%{'sm_name':sm_name, 'return_type':tdefs_return_type}, ""][check_control('Embedded')]
            
     odict = {'sm_name':sm_name, 'hsep':('*' * cmntlen), 'sm_info':sm_info,
              'sm_obj_type':sm_objt, 'sm_evt_type':sm_evtt,
@@ -182,7 +184,7 @@ sm_errs = [
 def write_sm_error(outf, err_id, sm_name):
     outf.write('%s_State_Machine_Error(%s, %s, '%(sm_name,
                                                 XL("_/OBJ"), XL("_/EVT")))
-    if check_control("Embedded"):
+    if check_control("Embedded") or check_control('Program_Space_Strings'):
         etext = '%d, "");\n'%err_id
     else:
         etext = sm_errs[err_id]%{'sm_name':sm_name,

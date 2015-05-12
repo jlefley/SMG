@@ -28,19 +28,20 @@ smg_version="v1.7.4"
 # {{{ Controls
 
 Controls = {
-'Use_Enums':0,      # True for enum declarations, false for #define instead */
+'Use_Enums':0,             # True for enum declarations, false for #define instead */
 
-'Nested_Switch':0,  # True for nested switch dispatching; false for one
-                    # switch statement with combined state/event cases
+'Nested_Switch':0,         # True for nested switch dispatching; false for one
+                           # switch statement with combined state/event cases
 
-'Run_Indent':0,     # True to run indent on the output file
-'Verbose':0,        # True to output verbose processing information
-'Line_Directives':1,# True to output #line directives to .c file
-'GViz_Output':"ps", # Argument to dot's -T option for output type
-'Trace_Events':0,   # True to output SM_TRACE for events
-'Defer_EvGen':0,    # True to defer event generation in tagged code
-'Bounds_Check':0,   # True to bounds check incoming event values
-'Embedded':0,       # True to generate tight, embeddable code
+'Run_Indent':0,            # True to run indent on the output file
+'Verbose':0,               # True to output verbose processing information
+'Line_Directives':1,       # True to output #line directives to .c file
+'GViz_Output':"ps",        # Argument to dot's -T option for output type
+'Trace_Events':0,          # True to output SM_TRACE for events
+'Defer_EvGen':0,           # True to defer event generation in tagged code
+'Bounds_Check':0,          # True to bounds check incoming event values
+'Embedded':0,              # True to generate tight, embeddable code
+'Program_Space_Strings': 0 # True to place strings in program space (AVR libc)
 }
 
 def adjust_control(control_name, control_value):
