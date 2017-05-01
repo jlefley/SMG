@@ -41,6 +41,8 @@ void %(sm_name)s_State_Machine_Init(%(sm_obj_type)s _/OBJ,
                                     %(sm_name)s_state_t initial_state);
                 """%{'sm_name':sm_name, 'sm_obj_type':sm_objt}
 
+    pgmspace_include = ["", "#include <avr/pgmspace.h>"][check_control('Program_Space_Strings')]
+
     sdef_begin = [ """
 typedef int %(sm_name)s_state_t;  /* State Type */
 #define %(Undef_Trans)s 1
@@ -90,6 +92,7 @@ typedef enum {
            
     odict = {'sm_name':sm_name, 'hsep':('*' * cmntlen), 'sm_info':sm_info,
              'sm_obj_type':sm_objt, 'sm_evt_type':sm_evtt,
+             'pgmspace_include':pgmspace_include,
              'state_def_begin':sdef_begin, 'state_def_end':sdef_end,
              'event_def_begin':edef_begin, 'event_def_end':edef_end,
              'macro_defs':mdefs, 'tdefs':tdefs, 'sinit':sinit}
@@ -105,6 +108,8 @@ typedef enum {
 
 #ifndef _%(sm_name)s_SM_DEFS_
 #define _%(sm_name)s_SM_DEFS_
+
+%(pgmspace_include)s
 
 %(state_def_begin)s
 <state_defs>
